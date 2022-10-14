@@ -18,7 +18,19 @@ a {
 
 .avatar {
   vertical-align: middle;
-  width: 90px;
+  width: 75px;
   height: auto;
-  border-radius: 50%;
+  /* border-radius: 50%; */
+}
+
+.avatar img {
+  transition: transform 0.2s;
+}
+
+.avatar img:hover {
+  transform: scale(1.3);
+}
+
+.avatar.active img {
+  outline: 5px solid red;
 }

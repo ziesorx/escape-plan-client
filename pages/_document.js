@@ -8,10 +8,7 @@ class MyDocument extends Document {
         <Head>
           <meta charSet="utf-8" />
           <meta name="theme-color" content="#000000" />
-          {/* <link
-            rel="shortcut icon"
-            href={require('assets/img/brand/s2s-logo.ico')}
-          /> */}
+          <link rel="escape icon" href="/img/escape-icon.ico" />
           {/* Fonts and icons */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

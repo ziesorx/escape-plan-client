@@ -11,10 +11,15 @@ import {
   CardBody,
   Input,
   Spinner,
+  ButtonGroup,
 } from 'reactstrap';
+
+import { avatars } from '../variables/avatars';
+import Swal from 'sweetalert2';
 
 const LandingPage = () => {
   const [name, setName] = useState('');
+  const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [disButton, setDisButton] = useState(false);
 
   useEffect(() => {
@@ -25,7 +30,13 @@ const LandingPage = () => {
 
   const onJoinClick = () => {
     setDisButton(true);
-    Router.push('/shit');
+
+    Swal.fire({
+      title: `Welcome ${name}!`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1500,
+    }).then(result => setDisButton(false));
     // socket.emit('player:create', name, '1');
   };
 
@@ -33,15 +44,23 @@ const LandingPage = () => {
     return <Spinner animation="border" role="status" size="sm"></Spinner>;
   };
 
-  const renderAvatar = () => {
+  const renderAvatar = avatar => {
     return (
-      <span className="avatar" onClick={e => e.preventDefault()}>
+      <Button
+        className="avatar bg-transparent border-0"
+        onClick={e => {
+          e.preventDefault();
+          setSelectedAvatar(avatar.id);
+        }}
+        active={selectedAvatar === avatar.id}
+      >
         <img
           alt="profile picture"
-          src="/profile-picture.png"
+          src={avatar.img_src}
           className="img-fluid rounded-circle w-100"
+          style={{ objectFit: 'fill' }}
         />
-      </span>
+      </Button>
     );
   };
 
@@ -58,36 +77,34 @@ const LandingPage = () => {
             >
               <CardBody className="px-lg-5 py-lg-5">
                 <div className="text-center mb-4">
-                  <strong style={{ fontSize: '1.5rem' }}>
-                    Welcome to Escape Plan
-                  </strong>
+                  <strong className="fs-1">Welcome to Escape Plan</strong>
                 </div>
                 <Row className="align-items-center">
-                  <Col md="3">
-                    <span style={{ fontSize: '1.5rem' }}>Name:</span>
+                  <Col md="3" className="text-center">
+                    <span className="fs-4">Name:</span>
                   </Col>
                   <Col md="9">
                     <Input
+                      bsSize="lg"
                       placeholder="Enter your name..."
                       onChange={e => setName(e.target.value)}
                     />
                   </Col>
                 </Row>
 
-                <Row className="mt-3 justify-content-between">
-                  {renderAvatar()}
-                  {renderAvatar()}
-                  {renderAvatar()}
-                  {renderAvatar()}
-                  {renderAvatar()}
+                <Row className="mt-4">
+                  <ButtonGroup className="justify-content-between">
+                    {avatars.map(avatar => renderAvatar(avatar))}
+                  </ButtonGroup>
                 </Row>
 
                 <Row>
                   <Button
                     color="dark"
-                    className="mt-3"
+                    className="mt-4"
                     onClick={onJoinClick}
                     disabled={disButton}
+                    size="lg"
                   >
                     {disButton ? renderSpinner() : 'Join Game'}
                   </Button>

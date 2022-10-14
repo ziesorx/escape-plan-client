@@ -18,7 +18,10 @@ class MyApp extends App {
             name="viewport"
             content="width=device-width, initial-scale=1, shrink-to-fit=no"
           />
-          <meta name="description" content="Escape Plan Staging"></meta>
+          <meta
+            name="description"
+            content="Game that will make your mind exploded"
+          ></meta>
           <title>Escape Plan</title>
         </Head>
 
