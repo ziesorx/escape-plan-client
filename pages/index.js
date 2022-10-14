@@ -47,6 +47,7 @@ const LandingPage = () => {
   const renderAvatar = avatar => {
     return (
       <Button
+        key={avatar.id}
         className="avatar bg-transparent border-0"
         onClick={e => {
           e.preventDefault();
