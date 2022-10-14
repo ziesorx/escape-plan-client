@@ -1,20 +1,46 @@
+/* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from 'react';
 import { socket } from '../services/socket';
-import { Button, Card, Container, Col, Row, CardBody, Input } from 'reactstrap';
+import {
+  Button,
+  Card,
+  Container,
+  Col,
+  Row,
+  CardBody,
+  Input,
+  Spinner,
+} from 'reactstrap';
 
 const LandingPage = () => {
   const [name, setName] = useState('');
+  const [disButton, setDisButton] = useState(false);
 
   useEffect(() => {
-    console.log(socket);
-
     socket.on('player:create-done', (name, avatar, role) => {
       console.log(name);
     });
   }, []);
 
   const onJoinClick = () => {
+    setDisButton(true);
     socket.emit('player:create', name, '1');
+  };
+
+  const renderSpinner = () => {
+    return <Spinner animation="border" role="status" size="sm"></Spinner>;
+  };
+
+  const renderAvatar = () => {
+    return (
+      <span className="avatar" onClick={e => e.preventDefault()}>
+        <img
+          alt="profile picture"
+          src="/profile-picture.png"
+          className="img-fluid rounded-circle w-100"
+        />
+      </span>
+    );
   };
 
   return (
@@ -48,9 +74,27 @@ const LandingPage = () => {
                   </Col>
                 </Row>
 
+                <Row className="mt-3 justify-content-between">
+                  {/* {() => {
+                    for (let i = 0; i < 5; i++) {
+                      renderAvatar();
+                    }
+                  }} */}
+                  {renderAvatar()}
+                  {renderAvatar()}
+                  {renderAvatar()}
+                  {renderAvatar()}
+                  {renderAvatar()}
+                </Row>
+
                 <Row>
-                  <Button color="dark" className="mt-3" onClick={onJoinClick}>
-                    Join Game
+                  <Button
+                    color="dark"
+                    className="mt-3"
+                    onClick={onJoinClick}
+                    disabled={disButton}
+                  >
+                    {disButton ? renderSpinner() : 'Join Game'}
                   </Button>
                 </Row>
               </CardBody>

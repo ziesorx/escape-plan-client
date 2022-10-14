@@ -1,16 +1,12 @@
 import Head from 'next/head';
-import Image from 'next/image';
 import App from 'next/app';
 import 'bootstrap/dist/css/bootstrap.css';
 
 import '../styles/globals.css';
 import Layout from '../layouts/Layout';
-import { socket } from '../services/socket';
 
 class MyApp extends App {
-  componentDidMount() {
-    socket.on('connect');
-  }
+  componentDidMount() {}
 
   render() {
     const { Component, pageProps } = this.props;

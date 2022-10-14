@@ -14,3 +14,10 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.avatar {
+  vertical-align: middle;
+  width: 90px;
+  height: auto;
+  border-radius: 50%;
+}
