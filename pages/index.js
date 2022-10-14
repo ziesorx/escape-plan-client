@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from 'react';
 import { socket } from '../services/socket';
+import Router from 'next/router';
 import {
   Button,
   Card,
@@ -24,7 +25,8 @@ const LandingPage = () => {
 
   const onJoinClick = () => {
     setDisButton(true);
-    socket.emit('player:create', name, '1');
+    Router.push('/shit');
+    // socket.emit('player:create', name, '1');
   };
 
   const renderSpinner = () => {
@@ -52,10 +54,6 @@ const LandingPage = () => {
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.6)',
                 border: '3px solid white',
-                position: 'absolute',
-                top: '46%',
-                transform: 'translate(0, -50%)',
-                width: '40%',
               }}
             >
               <CardBody className="px-lg-5 py-lg-5">
@@ -65,7 +63,9 @@ const LandingPage = () => {
                   </strong>
                 </div>
                 <Row className="align-items-center">
-                  <Col md="3">Name:</Col>
+                  <Col md="3">
+                    <span style={{ fontSize: '1.5rem' }}>Name:</span>
+                  </Col>
                   <Col md="9">
                     <Input
                       placeholder="Enter your name..."
@@ -75,11 +75,6 @@ const LandingPage = () => {
                 </Row>
 
                 <Row className="mt-3 justify-content-between">
-                  {/* {() => {
-                    for (let i = 0; i < 5; i++) {
-                      renderAvatar();
-                    }
-                  }} */}
                   {renderAvatar()}
                   {renderAvatar()}
                   {renderAvatar()}
