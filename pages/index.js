@@ -19,7 +19,7 @@ import Swal from 'sweetalert2';
 
 const LandingPage = () => {
   const [name, setName] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState(null);
+  const [selectedAvatarId, setSelectedAvatarId] = useState(null);
   const [disButton, setDisButton] = useState(false);
 
   useEffect(() => {
@@ -51,9 +51,9 @@ const LandingPage = () => {
         className="avatar bg-transparent border-0"
         onClick={e => {
           e.preventDefault();
-          setSelectedAvatar(avatar.id);
+          setSelectedAvatarId(avatar.id);
         }}
-        active={selectedAvatar === avatar.id}
+        active={selectedAvatarId === avatar.id}
       >
         <img
           alt="profile picture"
