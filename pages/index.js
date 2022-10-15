@@ -19,8 +19,11 @@ import Swal from 'sweetalert2';
 
 const LandingPage = () => {
   const [name, setName] = useState('');
+  const [roomId, setRoomId] = useState('');
   const [selectedAvatarId, setSelectedAvatarId] = useState(null);
-  const [disButton, setDisButton] = useState(false);
+  const [disCreateButton, setDisCreateButton] = useState(false);
+  const [disJoinButton, setDisJoinButton] = useState(false);
+  const [joinRoom, setJoinRoom] = useState(false);
 
   useEffect(() => {
     socket.on('player:create-done', (name, avatar, role) => {
@@ -28,15 +31,47 @@ const LandingPage = () => {
     });
   }, []);
 
-  const onJoinClick = () => {
-    setDisButton(true);
+  const onCreateClick = () => {
+    setDisCreateButton(true);
 
     Swal.fire({
-      title: `Welcome ${name}!`,
+      title: `Room Created!`,
       icon: 'success',
       showConfirmButton: false,
       timer: 1500,
-    }).then(result => setDisButton(false));
+    }).then(result => setDisCreateButton(false));
+  };
+
+  const onJoinRoomClick = () => {
+    setJoinRoom(true);
+  };
+
+  const onJoinClick = () => {
+    setDisJoinButton(true);
+
+    if (!roomId) {
+      Swal.fire({
+        title: `Please enter room id`,
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 1500,
+      }).then(result => {
+        setDisJoinButton(false);
+      });
+
+      return;
+    }
+
+    Swal.fire({
+      title: `Welcome ${name}!`,
+      text: `Joined room ${roomId}`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1500,
+    }).then(result => {
+      setDisJoinButton(false);
+      setRoomId('');
+    });
     // socket.emit('player:create', name, '1');
   };
 
@@ -65,6 +100,49 @@ const LandingPage = () => {
     );
   };
 
+  const renderJoinButton = () => {
+    return (
+      <Col>
+        <Button
+          block
+          color="dark"
+          className="mt-4"
+          onClick={onJoinRoomClick}
+          size="lg"
+        >
+          Join Room
+        </Button>
+      </Col>
+    );
+  };
+
+  const renderJoin = () => {
+    return (
+      <>
+        <Col md="8">
+          <Input
+            bsSize="lg"
+            placeholder="Enter your room id"
+            onChange={e => setRoomId(e.target.value)}
+            value={roomId}
+          />
+        </Col>
+        <Col md="4">
+          <Button
+            block
+            color="dark"
+            className="mt-4"
+            onClick={onJoinClick}
+            disabled={disJoinButton}
+            size="lg"
+          >
+            {disJoinButton ? renderSpinner() : 'Join'}
+          </Button>
+        </Col>
+      </>
+    );
+  };
+
   return (
     <>
       <Container className="mt--6 pb-5" fluid>
@@ -72,7 +150,7 @@ const LandingPage = () => {
           <Col md="5">
             <Card
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
                 border: '3px solid white',
               }}
             >
@@ -89,6 +167,7 @@ const LandingPage = () => {
                       bsSize="lg"
                       placeholder="Enter your name..."
                       onChange={e => setName(e.target.value)}
+                      value={name}
                     />
                   </Col>
                 </Row>
@@ -100,15 +179,21 @@ const LandingPage = () => {
                 </Row>
 
                 <Row>
-                  <Button
-                    color="dark"
-                    className="mt-4"
-                    onClick={onJoinClick}
-                    disabled={disButton}
-                    size="lg"
-                  >
-                    {disButton ? renderSpinner() : 'Join Game'}
-                  </Button>
+                  <Col>
+                    <Button
+                      block
+                      className="mt-4 btn-create"
+                      onClick={onCreateClick}
+                      disabled={disCreateButton}
+                      size="lg"
+                    >
+                      {disCreateButton ? renderSpinner() : 'Create Room'}
+                    </Button>
+                  </Col>
+                </Row>
+
+                <Row className="align-items-end">
+                  {joinRoom ? renderJoin() : renderJoinButton()}
                 </Row>
               </CardBody>
             </Card>

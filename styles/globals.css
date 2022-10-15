@@ -34,3 +34,13 @@ a {
 .avatar.active img {
   outline: 5px solid red;
 }
+
+.btn-create {
+  background-color: #8c4968;
+  border-color: #8c4968;
+}
+
+.btn-create:hover {
+  background-color: rgba(140, 73, 104, 0.9);
+  border-color: rgba(140, 73, 104, 0.9);
+}
