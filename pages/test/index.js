@@ -15,7 +15,7 @@ import {
 
 import { avatars } from '../../variables/avatars';
 
-const LandingPage = () => {
+const TestPage = () => {
   useEffect(() => {
     socket.on('room:create-done', roomId => {
       console.log(roomId);
@@ -170,4 +170,4 @@ const LandingPage = () => {
   );
 };
 
-export default LandingPage;
+export default TestPage;
