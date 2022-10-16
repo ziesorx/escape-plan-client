@@ -5,6 +5,9 @@ import 'bootstrap/dist/css/bootstrap.css';
 import '../styles/globals.css';
 import Layout from '../layouts/Layout';
 
+import { store } from '../store/store';
+import { Provider } from 'react-redux';
+
 class MyApp extends App {
   componentDidMount() {}
 
@@ -25,9 +28,11 @@ class MyApp extends App {
           <title>Escape Plan</title>
         </Head>
 
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
+        <Provider store={store}>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </Provider>
       </>
     );
   }

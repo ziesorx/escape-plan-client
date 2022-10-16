@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { socket } from '../services/socket';
 import Router from 'next/router';
 import {
@@ -13,21 +14,29 @@ import {
   Spinner,
   ButtonGroup,
 } from 'reactstrap';
+import anime from 'animejs';
 
 import { avatars } from '../variables/avatars';
 import Swal from 'sweetalert2';
+import { setUser, clearUser } from '../store/features/userSlice';
 
 const LandingPage = () => {
   const [name, setName] = useState('');
   const [roomId, setRoomId] = useState('');
-  const [selectedAvatarId, setSelectedAvatarId] = useState(null);
+  const [selectedAvatarId, setSelectedAvatarId] = useState();
   const [disCreateButton, setDisCreateButton] = useState(false);
   const [disJoinButton, setDisJoinButton] = useState(false);
   const [joinRoom, setJoinRoom] = useState(false);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    socket.on('player:create-done', (name, avatar, role) => {
-      console.log(name);
+    socket.on('room:create-done', roomId => {
+      console.log(roomId);
+    });
+
+    socket.on('room:join-done', gameElement => {
+      console.log(gameElement);
     });
   }, []);
 
@@ -39,7 +48,11 @@ const LandingPage = () => {
       icon: 'success',
       showConfirmButton: false,
       timer: 1500,
-    }).then(result => setDisCreateButton(false));
+    }).then(result => {
+      socket.emit('room:create');
+
+      setDisCreateButton(false);
+    });
   };
 
   const onJoinRoomClick = () => {
@@ -51,7 +64,7 @@ const LandingPage = () => {
 
     if (!roomId) {
       Swal.fire({
-        title: `Please enter room id`,
+        title: 'Room not found',
         icon: 'error',
         showConfirmButton: false,
         timer: 1500,
@@ -62,17 +75,48 @@ const LandingPage = () => {
       return;
     }
 
+    let invalidRoom = false;
+
     Swal.fire({
-      title: `Welcome ${name}!`,
-      text: `Joined room ${roomId}`,
-      icon: 'success',
-      showConfirmButton: false,
+      title: 'Joining Room',
       timer: 1500,
+      timerProgressBar: true,
+      didOpen: () => {
+        Swal.showLoading();
+
+        socket.emit('room:join', roomId);
+
+        socket.on('error', message => {
+          if (message === 'no such room') {
+            invalidRoom = true;
+          }
+        });
+      },
     }).then(result => {
-      setDisJoinButton(false);
-      setRoomId('');
+      if (invalidRoom) {
+        Swal.fire({
+          title: 'Room not found',
+          icon: 'error',
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(result => {
+          setDisJoinButton(false);
+        });
+
+        return;
+      } else {
+        Swal.fire({
+          title: `Welcome ${name}!`,
+          text: `Joined room ${roomId}`,
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(result => {
+          setDisJoinButton(false);
+          setRoomId('');
+        });
+      }
     });
-    // socket.emit('player:create', name, '1');
   };
 
   const renderSpinner = () => {
@@ -131,7 +175,7 @@ const LandingPage = () => {
           <Button
             block
             color="dark"
-            className="mt-4"
+            className="mt-4 "
             onClick={onJoinClick}
             disabled={disJoinButton}
             size="lg"
