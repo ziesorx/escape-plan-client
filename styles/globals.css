@@ -35,6 +35,25 @@ a {
   outline: 5px solid red;
 }
 
+/* Ref: https://mademyday.de/height-equals-width-with-pure-css/ */
+.game-tile {
+  position: relative;
+  width: 50%;
+}
+
+.game-tile::before {
+  content: '';
+  float: left;
+  padding-top: 100%;
+}
+
+.highlighted {
+  background-color: rgba(255, 255, 0, 0.3);
+}
+
+/*
+FOR TEST
+*/
 .btn-create {
   background-color: #8c4968;
   border-color: #8c4968;
