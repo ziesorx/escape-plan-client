@@ -1,10 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
-import Router from 'next/router';
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { avatars } from '../variables/avatars';
+import Router from 'next/router'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faUser } from '@fortawesome/free-solid-svg-icons'
+import { avatars } from '../variables/avatars'
 
 import {
   Button,
@@ -17,21 +17,21 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from 'reactstrap';
+} from 'reactstrap'
 
 const Waiting = () => {
-  const { currentRoom } = useSelector((state) => state.room);
+  const { currentRoom } = useSelector((state) => state.room)
 
   const backToIndex = () => {
-    Router.push('/');
-  };
+    Router.push('/')
+  }
 
-  const [modal, setModal] = useState(false);
-  const toggle = () => setModal(!modal);
-  const isHost = () => {};
+  const [modal, setModal] = useState(false)
+  const toggle = () => setModal(!modal)
+  const isHost = () => {}
 
-  if (!currentRoom) return;
-  console.log(currentRoom);
+  if (!currentRoom) return
+  console.log(currentRoom)
 
   return (
     <>
@@ -97,6 +97,9 @@ const Waiting = () => {
                   <FontAwesomeIcon icon={faUser} />
                 </Button>
                 <Button
+                  onClick={() => {
+                    Router.push('/game-time')
+                  }}
                   color="danger"
                   className="mb-2 position-absolute bottom-0 end-50"
                 >
@@ -133,7 +136,7 @@ const Waiting = () => {
         </Card>
       </Container>
     </>
-  );
-};
+  )
+}
 
-export default Waiting;
+export default Waiting
