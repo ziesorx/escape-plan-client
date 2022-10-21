@@ -1,22 +1,22 @@
 export const avatars = [
   {
     id: 1,
-    img_src: '/img/tanjiro-profile-pic.jpg',
+    img_src: '/img/Bluepackman.png',
   },
   {
     id: 2,
-    img_src: '/img/nezuko-profile-pic.jpg',
+    img_src: '/img/Greenpackman.png',
   },
   {
     id: 3,
-    img_src: '/img/zenitsu-profile-pic.jpg',
+    img_src: '/img/Pinkpackman.png',
   },
   {
     id: 4,
-    img_src: '/img/inosuke-profile-pic.jpg',
+    img_src: '/img/Redpackman.png',
   },
   {
     id: 5,
-    img_src: '/img/giyu-profile-pic.jpg',
+    img_src: '/img/Yellowpackman.png',
   },
-];
+]
