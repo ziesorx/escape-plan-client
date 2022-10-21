@@ -1,8 +1,9 @@
-import Timer from './Timer'
+/* eslint-disable @next/next/no-img-element */
+import Timer from './Timer';
 
 const Header = ({ myImg, oppoImg, isWarder, myScore, oppoScore, round }) => {
-  const role = isWarder == false ? 'prisoner' : 'warder'
-  const oppoRole = isWarder == false ? 'warder' : 'prisoner'
+  const role = isWarder == false ? 'prisoner' : 'warder';
+  const oppoRole = isWarder == false ? 'warder' : 'prisoner';
 
   return (
     <header className="row justify-content-between">
@@ -38,7 +39,7 @@ const Header = ({ myImg, oppoImg, isWarder, myScore, oppoScore, round }) => {
         <h6>SCORE : {oppoScore}</h6>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

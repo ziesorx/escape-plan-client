@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
-import { Button, Card, Row, Col, Container } from 'reactstrap'
-import Header from './component/Header'
-const newgame = () => {
-  const [isWarder, setIsWarder] = useState(true)
-  const [isHover, setIsHover] = useState(false)
+/* eslint-disable @next/next/no-img-element */
+import React, { useState } from 'react';
+import { Button, Card, Row, Col, Container } from 'reactstrap';
+import Header from '../components/Header';
+
+const Newgame = () => {
+  const [isWarder, setIsWarder] = useState(true);
+  const [isHover, setIsHover] = useState(false);
 
   const [matrix, setMatrix] = useState([
     [0, 0, 0, 0, 0],
@@ -11,22 +13,22 @@ const newgame = () => {
     [0, 0, 0, 0, 0],
     [0, 0, 0, 'p', 0],
     [0, 0, 0, 0, 0],
-  ])
+  ]);
 
   const findPos = (array, symbol) => {
-    const string = array.toString().replace(/,/g, '')
-    const pos = string.indexOf(symbol)
+    const string = array.toString().replace(/,/g, '');
+    const pos = string.indexOf(symbol);
 
-    const d = (array[0] || []).length
+    const d = (array[0] || []).length;
 
-    const x = pos % d
-    const y = Math.floor(pos / d)
+    const x = pos % d;
+    const y = Math.floor(pos / d);
 
-    return { y, x }
-  }
+    return { y, x };
+  };
 
-  const highlightTile = (coord) => {
-    const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p')
+  const highlightTile = coord => {
+    const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p');
 
     if (isHover) {
       if (
@@ -35,14 +37,14 @@ const newgame = () => {
         (coord.y === charCoor.y && coord.x === charCoor.x + 1) ||
         (coord.y === charCoor.y && coord.x === charCoor.x - 1)
       ) {
-        return `highlighted`
+        return `highlighted`;
       } else {
-        return ''
+        return '';
       }
     }
-  }
+  };
 
-  const renderCharacter = (character) => {
+  const renderCharacter = character => {
     if (character === 'w') {
       return (
         <>
@@ -55,7 +57,7 @@ const newgame = () => {
             onMouseLeave={() => setIsHover(false)}
           />
         </>
-      )
+      );
     } else if (character === 'p') {
       return (
         <>
@@ -68,11 +70,11 @@ const newgame = () => {
             onMouseLeave={() => setIsHover(false)}
           />
         </>
-      )
+      );
     }
 
-    return <div className="free-space-tile"></div>
-  }
+    return <div className="free-space-tile"></div>;
+  };
 
   return (
     <Col className="position-relative mx-auto" sm="10" md="5">
@@ -109,22 +111,22 @@ const newgame = () => {
                             { x: columnIdx, y: rowIdx }
                           )}`}
                           onClick={() => {
-                            console.log(rowIdx, columnIdx)
+                            console.log(rowIdx, columnIdx);
                           }}
                         >
                           {renderCharacter(column)}
                         </Col>
-                      )
+                      );
                     })}
                   </Row>
-                )
+                );
               })}
             </Col>
           </Row>
         </Container>
       </Card>
     </Col>
-  )
-}
+  );
+};
 
-export default newgame
+export default Newgame;
