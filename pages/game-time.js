@@ -1,32 +1,33 @@
-import React, { useEffect, useState } from 'react'
-import { Card, Container } from 'react-bootstrap'
-import { Row, Col } from 'reactstrap'
+/* eslint-disable @next/next/no-img-element */
+import React, { useEffect, useState } from 'react';
+import { Card, Row, Col, Container } from 'reactstrap';
+import Header from '../components/Header';
 
 const GamePage = () => {
+  const [isWarder, setIsWarder] = useState(true);
+  const [isHover, setIsHover] = useState(false);
   const [matrix, setMatrix] = useState([
     [0, 0, 0, 0, 0],
     ['w', 0, 0, 0, 0],
     [0, 0, 0, 0, 0],
     [0, 0, 0, 'p', 0],
     [0, 0, 0, 0, 0],
-  ])
-  const [isWanderer, setIsWanderer] = useState(true)
-  const [isHover, setIsHover] = useState(false)
+  ]);
 
   const findPos = (array, symbol) => {
-    const string = array.toString().replace(/,/g, '')
-    const pos = string.indexOf(symbol)
+    const string = array.toString().replace(/,/g, '');
+    const pos = string.indexOf(symbol);
 
-    const d = (array[0] || []).length
+    const d = (array[0] || []).length;
 
-    const x = pos % d
-    const y = Math.floor(pos / d)
+    const x = pos % d;
+    const y = Math.floor(pos / d);
 
-    return { y, x }
-  }
+    return { y, x };
+  };
 
-  const highlightTile = (coord) => {
-    const charCoor = isWanderer ? findPos(matrix, 'w') : findPos(matrix, 'p')
+  const highlightTile = coord => {
+    const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p');
 
     if (isHover) {
       if (
@@ -35,14 +36,14 @@ const GamePage = () => {
         (coord.y === charCoor.y && coord.x === charCoor.x + 1) ||
         (coord.y === charCoor.y && coord.x === charCoor.x - 1)
       ) {
-        return `highlighted`
+        return `highlighted`;
       } else {
-        return ''
+        return '';
       }
     }
-  }
+  };
 
-  const renderCharacter = (character) => {
+  const renderCharacter = character => {
     if (character === 'w') {
       return (
         <>
@@ -51,11 +52,11 @@ const GamePage = () => {
             className="img-fluid"
             alt="Wanderder pic"
             style={{ height: '100%', objectFit: 'cover' }}
-            onMouseEnter={() => isWanderer && setIsHover(true)}
+            onMouseEnter={() => isWarder && setIsHover(true)}
             onMouseLeave={() => setIsHover(false)}
           />
         </>
-      )
+      );
     } else if (character === 'p') {
       return (
         <>
@@ -64,49 +65,95 @@ const GamePage = () => {
             className="img-fluid"
             alt="Prisoner pic"
             style={{ height: '100%', objectFit: 'cover' }}
-            onMouseEnter={() => !isWanderer && setIsHover(true)}
+            onMouseEnter={() => !isWarder && setIsHover(true)}
             onMouseLeave={() => setIsHover(false)}
           />
         </>
-      )
+      );
     }
 
-    return <div className="free-space-tile"></div>
-  }
+    return <div className="free-space-tile"></div>;
+  };
+
+  const updateBoard = (rowIdx, columnIdx) => {
+    const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p');
+
+    if (
+      !(rowIdx === charCoor.y + 1 && columnIdx === charCoor.x) &&
+      !(rowIdx === charCoor.y - 1 && columnIdx === charCoor.x) &&
+      !(rowIdx === charCoor.y && columnIdx === charCoor.x + 1) &&
+      !(rowIdx === charCoor.y && columnIdx === charCoor.x - 1)
+    ) {
+      return;
+    }
+
+    setMatrix(prevBoard => {
+      const newBoard = [...prevBoard];
+
+      newBoard[charCoor.y] = [...newBoard[charCoor.y]];
+      newBoard[charCoor.y][charCoor.x] = 0;
+      newBoard[rowIdx][columnIdx] = isWarder ? 'w' : 'p';
+
+      return newBoard;
+    });
+  };
+
+  // useEffect(() => {}, [matrix]);
 
   return (
     <Container className="mt--6" fluid>
       <Row className="justify-content-center mx-auto">
-        <Col
-          md="5"
-          className="bg-white border border-1 border-dark"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.8) !important' }}
-        >
-          {matrix.map((row, rowIdx) => {
-            return (
-              <Row key={rowIdx}>
-                {row.map((column, columnIdx) => {
+        <Col className="position-relative" md="10">
+          <Card
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              border: '3px solid white',
+            }}
+          >
+            <Header
+              myImg={'/img/Bluepackman.png'}
+              oppoImg={'/img/Greenpackman.png'}
+              isWarder={true}
+              myScore={2}
+              oppoScore={300}
+            />
+
+            <Row className="justify-content-center mx-auto">
+              <Col
+                md="5"
+                className="bg-white border border-1 border-dark"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.8) !important',
+                }}
+              >
+                {matrix.map((row, rowIdx) => {
                   return (
-                    <Col
-                      key={columnIdx}
-                      className={`border border-1 border-dark game-tile px-0 ${highlightTile(
-                        { x: columnIdx, y: rowIdx }
-                      )}`}
-                      onClick={() => {
-                        console.log(rowIdx, columnIdx)
-                      }}
-                    >
-                      {renderCharacter(column)}
-                    </Col>
-                  )
+                    <Row key={rowIdx}>
+                      {row.map((column, columnIdx) => {
+                        return (
+                          <Col
+                            key={columnIdx}
+                            className={`border border-1 border-dark game-tile px-0 ${highlightTile(
+                              { x: columnIdx, y: rowIdx }
+                            )}`}
+                            onClick={() => {
+                              updateBoard(rowIdx, columnIdx);
+                            }}
+                          >
+                            {renderCharacter(column)}
+                          </Col>
+                        );
+                      })}
+                    </Row>
+                  );
                 })}
-              </Row>
-            )
-          })}
+              </Col>
+            </Row>
+          </Card>
         </Col>
       </Row>
     </Container>
-  )
-}
+  );
+};
 
-export default GamePage
+export default GamePage;

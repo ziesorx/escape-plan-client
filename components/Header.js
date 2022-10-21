@@ -1,8 +1,9 @@
-import Timer from './Timer'
+/* eslint-disable @next/next/no-img-element */
+import Timer from './Timer';
 
 const Header = ({ myImg, oppoImg, isWarder, myScore, oppoScore, round }) => {
-  const role = isWarder == false ? 'prisoner' : 'warder'
-  const oppoRole = isWarder == false ? 'warder' : 'prisoner'
+  const role = isWarder == false ? 'prisoner' : 'warder';
+  const oppoRole = isWarder == false ? 'warder' : 'prisoner';
 
   return (
     <header className="row justify-content-between">
@@ -15,15 +16,15 @@ const Header = ({ myImg, oppoImg, isWarder, myScore, oppoScore, round }) => {
             style={{ objectFit: 'fill' }}
           />
         </div>
-        <h6>ROLE :{role}</h6>
-        <h6>SCORE : {myScore}</h6>
+        <h4>ROLE : {role}</h4>
+        <h4>SCORE : {myScore}</h4>
       </div>
       <div className="col-4 text-center">
-        <h6>
+        <span>
           <Timer />
-        </h6>
-        <h6>turn</h6>
-        <p className="display-3">{round ?? 1}</p>
+        </span>
+        <h3 className="mb-0">turn {round ?? 1}</h3>
+        {/* <p className="display-3">{round ?? 1}</p> */}
       </div>
       <div className="col-4 text-end align-items-end d-flex flex-column">
         <div className="avatar">
@@ -34,11 +35,11 @@ const Header = ({ myImg, oppoImg, isWarder, myScore, oppoScore, round }) => {
             style={{ objectFit: 'fill' }}
           />
         </div>
-        <h6>ROLE :{oppoRole}</h6>
-        <h6>SCORE : {oppoScore}</h6>
+        <h4>ROLE : {oppoRole}</h4>
+        <h4>SCORE : {oppoScore}</h4>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

@@ -31,8 +31,24 @@ a {
   transform: scale(1.3);
 }
 
-.avatar.active img {
+.avatar.active img.red {
   outline: 5px solid red;
+}
+
+.avatar.active img.blue {
+  outline: 5px solid #59b8f9;
+}
+
+.avatar.active img.green {
+  outline: 5px solid #01b950;
+}
+
+.avatar.active img.pink {
+  outline: 5px solid #e791c1;
+}
+
+.avatar.active img.yellow {
+  outline: 5px solid #e2ba06;
 }
 
 /* Ref: https://mademyday.de/height-equals-width-with-pure-css/ */
