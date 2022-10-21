@@ -17,12 +17,12 @@ import { avatars } from '../../variables/avatars';
 
 const TestPage = () => {
   useEffect(() => {
-    socket.on('room:create-done', (roomId, avatarId) => {
-      console.log(roomId, avatarId);
+    socket.on('room:create-done', (roomId, userInfo) => {
+      console.log(roomId, userInfo);
     });
 
-    socket.on('room:join-done', (name, avatarId, roomId) => {
-      console.log(name, avatarId, roomId);
+    socket.on('room:join-done', (name, userInfo) => {
+      console.log(name, userInfo);
     });
 
     socket.on('room:start-done', (gameEl) => {
@@ -33,28 +33,28 @@ const TestPage = () => {
       console.log(userInfo);
     });
 
-    socket.on('room:delete-done', (socketRoom) => {
-      console.log(socketRoom);
+    socket.on('room:delete-done', (socketRooms) => {
+      console.log(socketRooms);
     });
 
-    socket.on('room:current-done', (socketRoom) => {
-      console.log(socketRoom);
+    socket.on('room:current-done', (socketRooms) => {
+      console.log(socketRooms);
     });
 
-    socket.on('game:coor-done', (coor, role) => {
-      console.log(coor, role);
-    });
-
-    socket.on('game:again-done', (gameEl) => {
-      console.log(gameEl);
+    socket.on('game:coor-done', (coor, isWarder) => {
+      console.log(coor, isWarder);
     });
 
     socket.on('game:again-done', (gameEl) => {
       console.log(gameEl);
     });
 
-    socket.on('game:again-done', (gameEl) => {
-      console.log(gameEl);
+    socket.on('user:info-done', (userInSocket) => {
+      console.log(userInSocket);
+    });
+
+    socket.on('user:score-done', (userInfo) => {
+      console.log(userInfo);
     });
   }, []);
 
@@ -63,7 +63,11 @@ const TestPage = () => {
   };
 
   const onJoin = () => {
-    socket.emit('room:join', 'Jimmy', 2);
+    socket.emit('room:join', 'Jimmy', 2, '111111');
+  };
+
+  const onStart = () => {
+    socket.emit('room:start');
   };
 
   const onLeave = () => {
@@ -158,7 +162,7 @@ const TestPage = () => {
                       coor:update
                     </Button>
                   </Col>
-                  <Col>
+                  {/* <Col>
                     <Button
                       block
                       className="mt-4"
@@ -167,6 +171,17 @@ const TestPage = () => {
                       color="danger"
                     >
                       user:leave
+                    </Button>
+                  </Col> */}
+                  <Col>
+                    <Button
+                      block
+                      className="mt-4"
+                      onClick={onStart}
+                      size="lg"
+                      color="primary"
+                    >
+                      room:start
                     </Button>
                   </Col>
                 </Row>
