@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Router from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,7 +17,7 @@ import {
   ModalFooter,
 } from 'reactstrap';
 
-const waiting = () => {
+const Waiting = () => {
   const backToIndex = () => {
     Router.push('/');
   };
@@ -30,7 +31,7 @@ const waiting = () => {
 
   return (
     <>
-      <Container>
+      <Container className="px-0" fluid>
         <Card
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -38,7 +39,7 @@ const waiting = () => {
             // height: '90vh',
           }}
         >
-          <Row className="justify-content-between" style={{ gap: '5rem' }}>
+          <Row className="justify-content-center" style={{ gap: '5rem' }}>
             <Row>
               <div>
                 <Button className="mt-2 mx-2 btn-create" onClick={backToIndex}>
@@ -118,4 +119,4 @@ const waiting = () => {
   );
 };
 
-export default waiting;
+export default Waiting;
