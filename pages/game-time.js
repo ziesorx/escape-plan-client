@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from 'react';
 import { Card, Container } from 'react-bootstrap';
 import { Row, Col } from 'reactstrap';
@@ -25,7 +26,7 @@ const GamePage = () => {
     return { y, x };
   };
 
-  const highlightTile = (coord) => {
+  const highlightTile = coord => {
     const charCoor = isWanderer ? findPos(matrix, 'w') : findPos(matrix, 'p');
 
     if (isHover) {
@@ -42,7 +43,7 @@ const GamePage = () => {
     }
   };
 
-  const renderCharacter = (character) => {
+  const renderCharacter = character => {
     if (character === 'w') {
       return (
         <>
