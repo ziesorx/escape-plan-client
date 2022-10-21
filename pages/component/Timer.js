@@ -6,7 +6,7 @@ const Timer = () => {
   const renderer = ({ minutes, seconds }) => {
     // Render a countdown
     return (
-      <span>
+      <span className="display-6">
         0{minutes}:{seconds}
       </span>
     )
