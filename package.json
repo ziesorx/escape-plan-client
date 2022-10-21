@@ -8,6 +8,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.2.0",
+    "@fortawesome/free-regular-svg-icons": "^6.2.0",
+    "@fortawesome/free-solid-svg-icons": "^6.2.0",
+    "@fortawesome/react-fontawesome": "^0.2.0",
     "@reduxjs/toolkit": "^1.8.6",
     "animejs": "^3.2.1",
     "axios": "^1.1.2",
@@ -15,6 +19,7 @@
     "next": "12.3.1",
     "react": "18.2.0",
     "react-bootstrap": "^2.5.0",
+    "react-countdown": "^2.3.2",
     "react-dom": "18.2.0",
     "react-redux": "^8.0.4",
     "reactstrap": "^9.1.4",

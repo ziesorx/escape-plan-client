@@ -31,12 +31,14 @@ const LandingPage = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    socket.on('room:create-done', roomId => {
+    socket.on('room:create-done', (roomId, userInfo) => {
       console.log(roomId);
+      console.log(userInfo);
     });
 
-    socket.on('room:join-done', gameElement => {
-      console.log(gameElement);
+    socket.on('room:join-done', (hostInfo, userInfo) => {
+      console.log(hostInfo);
+      console.log(userInfo);
     });
   }, []);
 
@@ -49,7 +51,7 @@ const LandingPage = () => {
       showConfirmButton: false,
       timer: 1500,
     }).then(result => {
-      socket.emit('room:create');
+      socket.emit('room:create', name, selectedAvatarId);
 
       setDisCreateButton(false);
     });
@@ -62,20 +64,18 @@ const LandingPage = () => {
   const onJoinClick = () => {
     setDisJoinButton(true);
 
-    if (!roomId) {
-      Swal.fire({
-        title: 'Room not found',
-        icon: 'error',
-        showConfirmButton: false,
-        timer: 1500,
-      }).then(result => {
-        setDisJoinButton(false);
-      });
+    // if (!roomId) {
+    //   Swal.fire({
+    //     title: 'Room not found',
+    //     icon: 'error',
+    //     showConfirmButton: false,
+    //     timer: 1500,
+    //   }).then(result => {
+    //     setDisJoinButton(false);
+    //   });
 
-      return;
-    }
-
-    let invalidRoom = false;
+    //   return;
+    // }
 
     Swal.fire({
       title: 'Joining Room',
@@ -84,7 +84,7 @@ const LandingPage = () => {
       didOpen: () => {
         Swal.showLoading();
 
-        socket.emit('room:join', roomId);
+        socket.emit('room:join', name, selectedAvatarId, roomId);
 
         socket.on('error', message => {
           if (message === 'no such room') {
@@ -93,29 +93,16 @@ const LandingPage = () => {
         });
       },
     }).then(result => {
-      if (invalidRoom) {
-        Swal.fire({
-          title: 'Room not found',
-          icon: 'error',
-          showConfirmButton: false,
-          timer: 1500,
-        }).then(result => {
-          setDisJoinButton(false);
-        });
-
-        return;
-      } else {
-        Swal.fire({
-          title: `Welcome ${name}!`,
-          text: `Joined room ${roomId}`,
-          icon: 'success',
-          showConfirmButton: false,
-          timer: 1500,
-        }).then(result => {
-          setDisJoinButton(false);
-          setRoomId('');
-        });
-      }
+      Swal.fire({
+        title: `Welcome ${name}!`,
+        text: `Joined room ${roomId}`,
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 1500,
+      }).then(result => {
+        setDisJoinButton(false);
+        setRoomId('');
+      });
     });
   };
 
@@ -137,7 +124,7 @@ const LandingPage = () => {
         <img
           alt="profile picture"
           src={avatar.img_src}
-          className="img-fluid rounded-circle w-100"
+          className={`img-fluid rounded-circle w-100 ${avatar.color}`}
           style={{ objectFit: 'fill' }}
         />
       </Button>
