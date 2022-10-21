@@ -4,7 +4,7 @@ const Layout = ({ children }) => {
     <div
       className="w-100 vh-100 d-inline-flex flex-column justify-content-center"
       style={{
-        backgroundImage: 'url("/img/game-background.png")',
+        backgroundImage: 'url("/img/city-bg.gif")',
         backgroundSize: 'cover',
       }}
     >

@@ -1,8 +1,8 @@
 import Timer from './Timer'
 
-const Header = ({ myImg, oppoImg, isPrisoner, myScore, oppoScore, round }) => {
-  const role = isPrisoner == true ? 'prisoner' : 'warder'
-  const oppoRole = isPrisoner == true ? 'warder' : 'prisoner'
+const Header = ({ myImg, oppoImg, isWarder, myScore, oppoScore, round }) => {
+  const role = isWarder == false ? 'prisoner' : 'warder'
+  const oppoRole = isWarder == false ? 'warder' : 'prisoner'
 
   return (
     <header className="row justify-content-between">
@@ -22,14 +22,15 @@ const Header = ({ myImg, oppoImg, isPrisoner, myScore, oppoScore, round }) => {
         <h6>
           <Timer />
         </h6>
-        <h6>ROUND : {round}</h6>
+        <h6>turn</h6>
+        <p className="display-3">{round ?? 1}</p>
       </div>
-      <div className="col-4">
+      <div className="col-4 text-end align-items-end d-flex flex-column">
         <div className="avatar">
           <img
             alt="profile picture"
             src={oppoImg}
-            className="img-fluid rounded-circle w-100"
+            className="img-fluid rounded-circle w-100 justify-content-end"
             style={{ objectFit: 'fill' }}
           />
         </div>
