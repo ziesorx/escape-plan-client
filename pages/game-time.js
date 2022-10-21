@@ -1,9 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from 'react';
-import { Card, Container } from 'react-bootstrap';
-import { Row, Col } from 'reactstrap';
+import { Card, Row, Col, Container } from 'reactstrap';
+import Header from '../components/Header';
 
 const GamePage = () => {
+  const [isWarder, setIsWarder] = useState(true);
+  const [isHover, setIsHover] = useState(false);
   const [matrix, setMatrix] = useState([
     [0, 0, 0, 0, 0],
     ['w', 0, 0, 0, 0],
@@ -11,8 +13,6 @@ const GamePage = () => {
     [0, 0, 0, 'p', 0],
     [0, 0, 0, 0, 0],
   ]);
-  const [isWanderer, setIsWanderer] = useState(true);
-  const [isHover, setIsHover] = useState(false);
 
   const findPos = (array, symbol) => {
     const string = array.toString().replace(/,/g, '');
@@ -27,7 +27,7 @@ const GamePage = () => {
   };
 
   const highlightTile = coord => {
-    const charCoor = isWanderer ? findPos(matrix, 'w') : findPos(matrix, 'p');
+    const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p');
 
     if (isHover) {
       if (
@@ -52,7 +52,7 @@ const GamePage = () => {
             className="img-fluid"
             alt="Wanderder pic"
             style={{ height: '100%', objectFit: 'cover' }}
-            onMouseEnter={() => isWanderer && setIsHover(true)}
+            onMouseEnter={() => isWarder && setIsHover(true)}
             onMouseLeave={() => setIsHover(false)}
           />
         </>
@@ -65,7 +65,7 @@ const GamePage = () => {
             className="img-fluid"
             alt="Prisoner pic"
             style={{ height: '100%', objectFit: 'cover' }}
-            onMouseEnter={() => !isWanderer && setIsHover(true)}
+            onMouseEnter={() => !isWarder && setIsHover(true)}
             onMouseLeave={() => setIsHover(false)}
           />
         </>
@@ -76,7 +76,7 @@ const GamePage = () => {
   };
 
   const updateBoard = (rowIdx, columnIdx) => {
-    const charCoor = isWanderer ? findPos(matrix, 'w') : findPos(matrix, 'p');
+    const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p');
 
     if (
       !(rowIdx === charCoor.y + 1 && columnIdx === charCoor.x) &&
@@ -92,43 +92,64 @@ const GamePage = () => {
 
       newBoard[charCoor.y] = [...newBoard[charCoor.y]];
       newBoard[charCoor.y][charCoor.x] = 0;
-      newBoard[rowIdx][columnIdx] = isWanderer ? 'w' : 'p';
+      newBoard[rowIdx][columnIdx] = isWarder ? 'w' : 'p';
 
       return newBoard;
     });
   };
 
-  useEffect(() => {}, [matrix]);
+  // useEffect(() => {}, [matrix]);
 
   return (
     <Container className="mt--6" fluid>
       <Row className="justify-content-center mx-auto">
-        <Col
-          md="5"
-          className="bg-white border border-1 border-dark"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.8) !important' }}
-        >
-          {matrix.map((row, rowIdx) => {
-            return (
-              <Row key={rowIdx}>
-                {row.map((column, columnIdx) => {
+        <Col className="position-relative" md="10">
+          <Card
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              border: '3px solid white',
+            }}
+          >
+            <Header
+              myImg={'/img/Bluepackman.png'}
+              oppoImg={'/img/Greenpackman.png'}
+              isWarder={true}
+              myScore={2}
+              oppoScore={300}
+            />
+
+            <Row className="justify-content-center mx-auto">
+              <Col
+                md="5"
+                className="bg-white border border-1 border-dark"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.8) !important',
+                }}
+              >
+                {matrix.map((row, rowIdx) => {
                   return (
-                    <Col
-                      key={columnIdx}
-                      className={`border border-1 border-dark game-tile px-0 ${highlightTile(
-                        { x: columnIdx, y: rowIdx }
-                      )}`}
-                      onClick={() => {
-                        updateBoard(rowIdx, columnIdx);
-                      }}
-                    >
-                      {renderCharacter(column)}
-                    </Col>
+                    <Row key={rowIdx}>
+                      {row.map((column, columnIdx) => {
+                        return (
+                          <Col
+                            key={columnIdx}
+                            className={`border border-1 border-dark game-tile px-0 ${highlightTile(
+                              { x: columnIdx, y: rowIdx }
+                            )}`}
+                            onClick={() => {
+                              updateBoard(rowIdx, columnIdx);
+                            }}
+                          >
+                            {renderCharacter(column)}
+                          </Col>
+                        );
+                      })}
+                    </Row>
                   );
                 })}
-              </Row>
-            );
-          })}
+              </Col>
+            </Row>
+          </Card>
         </Col>
       </Row>
     </Container>

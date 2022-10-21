@@ -77,55 +77,58 @@ const Newgame = () => {
   };
 
   return (
-    <Col className="position-relative mx-auto" sm="10" md="5">
-      <Card
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          border: '3px solid white',
-        }}
-      >
-        <Header
-          myImg={'/img/Bluepackman.png'}
-          oppoImg={'/img/Greenpackman.png'}
-          isWarder={true}
-          myScore={2}
-          oppoScore={300}
-        />
-        <Container className="mt--6" fluid>
-          <Row className="justify-content-center mx-auto">
-            <Col
-              md="5"
-              className="bg-white border border-1 border-dark"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.8) !important',
-              }}
-            >
-              {matrix.map((row, rowIdx) => {
-                return (
-                  <Row key={rowIdx}>
-                    {row.map((column, columnIdx) => {
-                      return (
-                        <Col
-                          key={columnIdx}
-                          className={`border border-1 border-dark game-tile px-0 ${highlightTile(
-                            { x: columnIdx, y: rowIdx }
-                          )}`}
-                          onClick={() => {
-                            console.log(rowIdx, columnIdx);
-                          }}
-                        >
-                          {renderCharacter(column)}
-                        </Col>
-                      );
-                    })}
-                  </Row>
-                );
-              })}
-            </Col>
-          </Row>
-        </Container>
-      </Card>
-    </Col>
+    <Container className="mt--6" fluid>
+      <Row className="justify-content-center mx-auto">
+        <Col className="position-relative" md="10">
+          <Card
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              border: '3px solid white',
+            }}
+          >
+            <Header
+              myImg={'/img/Bluepackman.png'}
+              oppoImg={'/img/Greenpackman.png'}
+              isWarder={true}
+              myScore={2}
+              oppoScore={300}
+            />
+
+            <Row className="justify-content-center mx-auto">
+              <Col
+                md="9"
+                className="bg-white border border-1 border-dark"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.8) !important',
+                }}
+              >
+                {matrix.map((row, rowIdx) => {
+                  return (
+                    <Row key={rowIdx}>
+                      {row.map((column, columnIdx) => {
+                        return (
+                          <Col
+                            key={columnIdx}
+                            className={`border border-1 border-dark game-tile px-0 ${highlightTile(
+                              { x: columnIdx, y: rowIdx }
+                            )}`}
+                            onClick={() => {
+                              updateBoard(rowIdx, columnIdx);
+                            }}
+                          >
+                            {renderCharacter(column)}
+                          </Col>
+                        );
+                      })}
+                    </Row>
+                  );
+                })}
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 
