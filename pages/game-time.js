@@ -75,6 +75,31 @@ const GamePage = () => {
     return <div className="free-space-tile"></div>;
   };
 
+  const updateBoard = (rowIdx, columnIdx) => {
+    const charCoor = isWanderer ? findPos(matrix, 'w') : findPos(matrix, 'p');
+
+    if (
+      !(rowIdx === charCoor.y + 1 && columnIdx === charCoor.x) &&
+      !(rowIdx === charCoor.y - 1 && columnIdx === charCoor.x) &&
+      !(rowIdx === charCoor.y && columnIdx === charCoor.x + 1) &&
+      !(rowIdx === charCoor.y && columnIdx === charCoor.x - 1)
+    ) {
+      return;
+    }
+
+    setMatrix(prevBoard => {
+      const newBoard = [...prevBoard];
+
+      newBoard[charCoor.y] = [...newBoard[charCoor.y]];
+      newBoard[charCoor.y][charCoor.x] = 0;
+      newBoard[rowIdx][columnIdx] = isWanderer ? 'w' : 'p';
+
+      return newBoard;
+    });
+  };
+
+  useEffect(() => {}, [matrix]);
+
   return (
     <Container className="mt--6" fluid>
       <Row className="justify-content-center mx-auto">
@@ -94,7 +119,7 @@ const GamePage = () => {
                         { x: columnIdx, y: rowIdx }
                       )}`}
                       onClick={() => {
-                        console.log(rowIdx, columnIdx);
+                        updateBoard(rowIdx, columnIdx);
                       }}
                     >
                       {renderCharacter(column)}

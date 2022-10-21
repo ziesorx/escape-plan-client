@@ -19,6 +19,7 @@ import anime from 'animejs';
 import { avatars } from '../variables/avatars';
 import Swal from 'sweetalert2';
 import { setUser, clearUser } from '../store/features/userSlice';
+import { setCurrentRoom, clearCurrentRoom } from '../store/features/roomSlice';
 
 const LandingPage = () => {
   const [name, setName] = useState('');
@@ -32,8 +33,8 @@ const LandingPage = () => {
 
   useEffect(() => {
     socket.on('room:create-done', (roomId, userInfo) => {
-      console.log(roomId);
-      console.log(userInfo);
+      dispatch(setCurrentRoom(roomId));
+      dispatch(setUser(userInfo));
     });
 
     socket.on('room:join-done', (hostInfo, userInfo) => {
@@ -45,16 +46,9 @@ const LandingPage = () => {
   const onCreateClick = () => {
     setDisCreateButton(true);
 
-    Swal.fire({
-      title: `Room Created!`,
-      icon: 'success',
-      showConfirmButton: false,
-      timer: 1500,
-    }).then(result => {
-      socket.emit('room:create', name, selectedAvatarId);
+    socket.emit('room:create', name.toLowerCase(), selectedAvatarId);
 
-      setDisCreateButton(false);
-    });
+    Router.push('/waiting');
   };
 
   const onJoinRoomClick = () => {
@@ -84,7 +78,7 @@ const LandingPage = () => {
       didOpen: () => {
         Swal.showLoading();
 
-        socket.emit('room:join', name, selectedAvatarId, roomId);
+        socket.emit('room:join', name.toLowerCase(), selectedAvatarId, roomId);
 
         socket.on('error', message => {
           if (message === 'no such room') {
