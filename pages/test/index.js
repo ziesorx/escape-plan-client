@@ -17,31 +17,53 @@ import { avatars } from '../../variables/avatars';
 
 const TestPage = () => {
   useEffect(() => {
-    socket.on('room:create-done', roomId => {
-      console.log(roomId);
+    socket.on('room:create-done', (roomId, avatarId) => {
+      console.log(roomId, avatarId);
     });
 
-    socket.on('room:join-done', gameEl => {
+    socket.on('room:join-done', (name, avatarId, roomId) => {
+      console.log(name, avatarId, roomId);
+    });
+
+    socket.on('room:start-done', (gameEl) => {
       console.log(gameEl);
     });
 
-    socket.on('user:leave-done', () => {});
+    socket.on('room:leave-done', (userInfo) => {
+      console.log(userInfo);
+    });
 
-    socket.on('disconnect-done', () => {});
+    socket.on('room:delete-done', (socketRoom) => {
+      console.log(socketRoom);
+    });
 
-    socket.on('coor:update-done', () => {});
+    socket.on('room:current-done', (socketRoom) => {
+      console.log(socketRoom);
+    });
 
-    socket.on('room:delete-done', () => {});
+    socket.on('game:coor-done', (coor, role) => {
+      console.log(coor, role);
+    });
 
-    socket.on('room:current-done', () => {});
+    socket.on('game:again-done', (gameEl) => {
+      console.log(gameEl);
+    });
+
+    socket.on('game:again-done', (gameEl) => {
+      console.log(gameEl);
+    });
+
+    socket.on('game:again-done', (gameEl) => {
+      console.log(gameEl);
+    });
   }, []);
 
   const onCreate = () => {
-    socket.emit('room:create');
+    socket.emit('room:create', 'Jackie', 1);
   };
 
   const onJoin = () => {
-    socket.emit('room:join');
+    socket.emit('room:join', 'Jimmy', 2);
   };
 
   const onLeave = () => {
