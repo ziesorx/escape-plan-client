@@ -1,5 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 import Router from 'next/router';
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { avatars } from '../variables/avatars';
@@ -18,6 +20,8 @@ import {
 } from 'reactstrap';
 
 const Waiting = () => {
+  const { currentRoom } = useSelector((state) => state.room);
+
   const backToIndex = () => {
     Router.push('/');
   };
@@ -26,13 +30,12 @@ const Waiting = () => {
   const toggle = () => setModal(!modal);
   const isHost = () => {};
 
-  useEffect(() => {
-    console.log(FontAwesomeIcon);
-  }, []);
+  if (!currentRoom) return;
+  console.log(currentRoom);
 
   return (
     <>
-      <Container>
+      <Container className="px-0" fluid>
         <Card
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -51,7 +54,9 @@ const Waiting = () => {
                 </Button>
                 <Row className="justify-content-center">
                   <Col md="4">
-                    <CardBody className="text-center fs-1">Waiting...</CardBody>
+                    <CardBody className="text-center fs-1">
+                      Room {currentRoom}
+                    </CardBody>
                   </Col>
                 </Row>
               </div>
