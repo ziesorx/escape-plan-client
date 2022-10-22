@@ -83,7 +83,7 @@ const Waiting = () => {
                 <Col md="4">
                   <Card className="text-md-center fs-2">
                     <Row>
-                      <span>{user.name}</span>
+                      <span>{userName}</span>
                     </Row>
                     <Row>
                       <img src={userAvatar[0].img_src} alt="Pacman avatar" />
