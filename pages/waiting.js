@@ -23,11 +23,11 @@ import { clearUser } from '../store/features/userSlice';
 import { clearCurrentRoom } from '../store/features/roomSlice';
 
 const Waiting = () => {
-  const { user } = useSelector((state) => state.user);
-  const { currentRoom } = useSelector((state) => state.room);
+  const { user } = useSelector(state => state.user);
+  const { currentRoom } = useSelector(state => state.room);
   const [userNo, setUserNo] = useState(1);
 
-  const userAvatar = avatars.filter((avatar) => avatar.id === user.avatarId);
+  const userAvatar = avatars.filter(avatar => avatar.id === user.avatarId);
   const userName = user.name;
 
   const dispatch = useDispatch();

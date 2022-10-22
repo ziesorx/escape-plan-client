@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { socket } from '../services/socket';
-import Router from 'next/router';
+import { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { socket } from '../services/socket'
+import Router from 'next/router'
 import {
   Button,
   Card,
@@ -14,50 +14,50 @@ import {
   Input,
   Spinner,
   ButtonGroup,
-} from 'reactstrap';
-import anime from 'animejs';
+} from 'reactstrap'
+import anime from 'animejs'
 
-import { avatars } from '../variables/avatars';
-import Swal from 'sweetalert2';
-import { setUser, clearUser } from '../store/features/userSlice';
-import { setCurrentRoom, clearCurrentRoom } from '../store/features/roomSlice';
+import { avatars } from '../variables/avatars'
+import Swal from 'sweetalert2'
+import { setUser, clearUser } from '../store/features/userSlice'
+import { setCurrentRoom, clearCurrentRoom } from '../store/features/roomSlice'
 
 const LandingPage = () => {
-  const [name, setName] = useState('');
-  const [roomId, setRoomId] = useState('');
-  const [selectedAvatarId, setSelectedAvatarId] = useState();
-  const [disCreateButton, setDisCreateButton] = useState(false);
-  const [disJoinButton, setDisJoinButton] = useState(false);
-  const [joinRoom, setJoinRoom] = useState(false);
+  const [name, setName] = useState('')
+  const [roomId, setRoomId] = useState('')
+  const [selectedAvatarId, setSelectedAvatarId] = useState()
+  const [disCreateButton, setDisCreateButton] = useState(false)
+  const [disJoinButton, setDisJoinButton] = useState(false)
+  const [joinRoom, setJoinRoom] = useState(false)
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
   useEffect(() => {
     socket.on('room:create-done', (roomId, userInfo) => {
-      dispatch(setCurrentRoom(roomId));
-      dispatch(setUser(userInfo));
-    });
+      dispatch(setCurrentRoom(roomId))
+      dispatch(setUser(userInfo))
+    })
 
     socket.on('room:join-done', (hostInfo, userInfo) => {
-      console.log(hostInfo);
-      console.log(userInfo);
-    });
-  }, []);
+      console.log(hostInfo)
+      console.log(userInfo)
+    })
+  }, [])
 
   const onCreateClick = () => {
-    setDisCreateButton(true);
+    setDisCreateButton(true)
 
-    socket.emit('room:create', name.toLowerCase(), selectedAvatarId);
+    socket.emit('room:create', name.toLowerCase(), selectedAvatarId)
 
-    Router.push('/waiting');
-  };
+    Router.push('/waiting')
+  }
 
   const onJoinRoomClick = () => {
-    setJoinRoom(true);
-  };
+    setJoinRoom(true)
+  }
 
   const onJoinClick = () => {
-    setDisJoinButton(true);
+    setDisJoinButton(true)
 
     // if (!roomId) {
     //   Swal.fire({
@@ -77,42 +77,42 @@ const LandingPage = () => {
       timer: 1500,
       timerProgressBar: true,
       didOpen: () => {
-        Swal.showLoading();
+        Swal.showLoading()
 
-        socket.emit('room:join', name.toLowerCase(), selectedAvatarId, roomId);
+        socket.emit('room:join', name.toLowerCase(), selectedAvatarId, roomId)
 
-        socket.on('error', message => {
+        socket.on('error', (message) => {
           if (message === 'no such room') {
-            invalidRoom = true;
+            invalidRoom = true
           }
-        });
+        })
       },
-    }).then(result => {
+    }).then((result) => {
       Swal.fire({
         title: `Welcome ${name}!`,
         text: `Joined room ${roomId}`,
         icon: 'success',
         showConfirmButton: false,
         timer: 1500,
-      }).then(result => {
-        setDisJoinButton(false);
-        setRoomId('');
-      });
-    });
-  };
+      }).then((result) => {
+        setDisJoinButton(false)
+        setRoomId('')
+      })
+    })
+  }
 
   const renderSpinner = () => {
-    return <Spinner animation="border" role="status" size="sm"></Spinner>;
-  };
+    return <Spinner animation="border" role="status" size="sm"></Spinner>
+  }
 
-  const renderAvatar = avatar => {
+  const renderAvatar = (avatar) => {
     return (
       <Button
         key={avatar.id}
         className="avatar bg-transparent border-0"
-        onClick={e => {
-          e.preventDefault();
-          setSelectedAvatarId(avatar.id);
+        onClick={(e) => {
+          e.preventDefault()
+          setSelectedAvatarId(avatar.id)
         }}
         active={selectedAvatarId === avatar.id}
       >
@@ -123,8 +123,8 @@ const LandingPage = () => {
           style={{ objectFit: 'fill' }}
         />
       </Button>
-    );
-  };
+    )
+  }
 
   const renderJoinButton = () => {
     return (
@@ -139,8 +139,8 @@ const LandingPage = () => {
           Join Room
         </Button>
       </Col>
-    );
-  };
+    )
+  }
 
   const renderJoin = () => {
     return (
@@ -149,7 +149,7 @@ const LandingPage = () => {
           <Input
             bsSize="lg"
             placeholder="Enter your room id"
-            onChange={e => setRoomId(e.target.value)}
+            onChange={(e) => setRoomId(e.target.value)}
             value={roomId}
           />
         </Col>
@@ -166,8 +166,8 @@ const LandingPage = () => {
           </Button>
         </Col>
       </>
-    );
-  };
+    )
+  }
 
   return (
     <>
@@ -192,7 +192,7 @@ const LandingPage = () => {
                     <Input
                       bsSize="lg"
                       placeholder="Enter your name..."
-                      onChange={e => setName(e.target.value)}
+                      onChange={(e) => setName(e.target.value)}
                       value={name}
                     />
                   </Col>
@@ -200,7 +200,7 @@ const LandingPage = () => {
 
                 <Row className="mt-4">
                   <ButtonGroup className="justify-content-between">
-                    {avatars.map(avatar => renderAvatar(avatar))}
+                    {avatars.map((avatar) => renderAvatar(avatar))}
                   </ButtonGroup>
                 </Row>
 
@@ -227,7 +227,7 @@ const LandingPage = () => {
         </Row>
       </Container>
     </>
-  );
-};
+  )
+}
 
-export default LandingPage;
+export default LandingPage

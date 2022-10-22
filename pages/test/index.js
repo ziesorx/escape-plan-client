@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useState } from 'react';
-import { socket } from '../../services/socket';
+import { useEffect, useState } from 'react'
+import { socket } from '../../services/socket'
 import {
   Button,
   Card,
@@ -11,58 +11,84 @@ import {
   Input,
   Spinner,
   ButtonGroup,
-} from 'reactstrap';
+} from 'reactstrap'
 
-import { avatars } from '../../variables/avatars';
+import { avatars } from '../../variables/avatars'
 
 const TestPage = () => {
   useEffect(() => {
-    socket.on('room:create-done', roomId => {
-      console.log(roomId);
-    });
+    socket.on('room:create-done', (roomId, userInfo) => {
+      console.log(roomId, userInfo)
+    })
 
-    socket.on('room:join-done', gameEl => {
-      console.log(gameEl);
-    });
+    socket.on('room:join-done', (hostInfo, userInfo) => {
+      console.log(hostInfo, userInfo)
+    })
 
-    socket.on('user:leave-done', () => {});
+    socket.on('room:start-done', (gameEl) => {
+      console.log(gameEl)
+    })
 
-    socket.on('disconnect-done', () => {});
+    socket.on('room:leave-done', (userInfo) => {
+      console.log(userInfo)
+    })
 
-    socket.on('coor:update-done', () => {});
+    socket.on('room:delete-done', (socketRooms) => {
+      console.log(socketRooms)
+    })
 
-    socket.on('room:delete-done', () => {});
+    socket.on('room:current-done', (socketRooms) => {
+      console.log(socketRooms)
+    })
 
-    socket.on('room:current-done', () => {});
-  }, []);
+    socket.on('game:coor-done', (coor, isWarder) => {
+      console.log(coor, isWarder)
+    })
+
+    socket.on('game:again-done', (gameEl) => {
+      console.log(gameEl)
+    })
+
+    socket.on('user:info-done', (userInSocket) => {
+      console.log(userInSocket)
+    })
+
+    socket.on('user:score-done', (userInfo) => {
+      console.log(userInfo)
+    })
+  }, [])
 
   const onCreate = () => {
-    socket.emit('room:create');
-  };
+    socket.emit('room:create', 'Jackie', 1)
+  }
 
   const onJoin = () => {
-    socket.emit('room:join');
-  };
+    socket.emit('room:join', 'Jimmy', 2, '111111')
+  }
+
+  const onStart = () => {
+    socket.emit('room:start')
+  }
 
   const onLeave = () => {
-    socket.emit('user:leave');
-  };
+    socket.emit('user:leave')
+  }
 
   const onDisconnect = () => {
-    socket.emit('disconnect');
-  };
+    socket.emit('disconnect')
+  }
 
   const onCoorUpdate = () => {
-    socket.emit('coor:update');
-  };
+    socket.emit('coor:update')
+  }
 
   const onRoomDelete = () => {
-    socket.emit('room:delete');
-  };
+    socket.emit('room:delete')
+  }
 
   const onCurrentRoom = () => {
-    socket.emit('room:current');
-  };
+    socket.emit('room:current')
+  }
 
   return (
     <>
@@ -136,7 +162,7 @@ const TestPage = () => {
                       coor:update
                     </Button>
                   </Col>
-                  <Col>
+                  {/* <Col>
                     <Button
                       block
                       className="mt-4"
@@ -145,6 +171,17 @@ const TestPage = () => {
                       color="danger"
                     >
                       user:leave
+                    </Button>
+                  </Col> */}
+                  <Col>
+                    <Button
+                      block
+                      className="mt-4"
+                      onClick={onStart}
+                      size="lg"
+                      color="primary"
+                    >
+                      room:start
                     </Button>
                   </Col>
                 </Row>
@@ -167,7 +204,7 @@ const TestPage = () => {
         </Row>
       </Container>
     </>
-  );
-};
+  )
+}
 
-export default TestPage;
+export default TestPage
