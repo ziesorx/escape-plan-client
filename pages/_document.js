@@ -11,7 +11,11 @@ class MyDocument extends Document {
           <link rel="escape icon" href="/img/escape-icon.ico" />
           {/* Fonts and icons */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+          <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossOrigin="anonymous"
+          />
           <link
             href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap"
             rel="stylesheet"

@@ -135,12 +135,12 @@ const Waiting = () => {
                     How to play this game
                   </ModalHeader>
                   <ModalBody>
-                    One day, there is a man who's a chad, namely Pond, and he
+                    One day, there is a man whos a chad, namely Pond, and he
                     stole the most prestiegeous diamond in the world from the
                     most famous shop keeper name Poraor. Try your best to escape
                     or catch the chad!!!
                     <Card>
-                      <img src="/img/gigachad.jpeg"></img>
+                      <img src="/img/gigachad.jpeg" alt="gigachad"></img>
                     </Card>
                   </ModalBody>
                   <ModalFooter>

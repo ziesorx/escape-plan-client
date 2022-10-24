@@ -8,7 +8,7 @@ const Layout = ({ children }) => {
         backgroundSize: 'cover',
       }}
     >
-      <div className="main-content">{children}</div>
+      {children}
     </div>
   );
 };
