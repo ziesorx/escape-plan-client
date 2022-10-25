@@ -16,40 +16,44 @@ import {
 import { avatars } from '../../variables/avatars';
 
 const TestPage = () => {
+  const [name, setName] = useState('');
+  const [name2, setName2] = useState('');
+  const [roomId, setRoomId] = useState('');
+
   useEffect(() => {
-    socket.on('user:error', (message) => {
+    socket.on('user:error', message => {
       console.log(message);
     });
 
-    socket.on('room:error', (message) => {
+    socket.on('room:error', message => {
       console.log(message);
     });
 
-    socket.on('user:login-done', (userInfo) => {
+    socket.on('user:login-done', userInfo => {
       console.log(userInfo);
     });
 
-    socket.on('user:info-done', (userInfo) => {
+    socket.on('user:info-done', userInfo => {
       console.log(userInfo);
     });
 
-    socket.on('user:get-all-done', (userInSocket) => {
+    socket.on('user:get-all-done', userInSocket => {
       console.log(userInSocket);
     });
 
-    socket.on('room:create-done', (roomDetail) => {
+    socket.on('room:create-done', roomDetail => {
       console.log(roomDetail);
     });
 
-    socket.on('room:join-done', (roomDetail) => {
+    socket.on('room:join-done', roomDetail => {
       console.log(roomDetail);
     });
 
-    socket.on('room:start-done', (gameEl) => {
+    socket.on('room:start-done', gameEl => {
       console.log(gameEl);
     });
 
-    socket.on('room:starting-done', (userInfo) => {
+    socket.on('room:starting-done', userInfo => {
       console.log(userInfo);
     });
 
@@ -79,23 +83,23 @@ const TestPage = () => {
   }, []);
 
   const onLogin1 = () => {
-    socket.emit('user:login', 'jackie', 1);
+    socket.emit('user:login', name, 1);
   };
 
   const onLogin2 = () => {
-    socket.emit('user:login', 'jimmy', 2);
+    socket.emit('user:login', name2, 2);
   };
 
   const onCreate = () => {
-    socket.emit('room:create', 'jackie', 'jimmy');
+    socket.emit('room:create');
   };
 
   const onJoin = () => {
-    socket.emit('room:join', '111111');
+    socket.emit('room:join', roomId);
   };
 
   const onStart = () => {
-    socket.emit('room:start', 'jackie', 'jimmy');
+    socket.emit('room:start', name, name2);
   };
 
   const onGetAllUser = () => {
@@ -136,6 +140,12 @@ const TestPage = () => {
               <CardBody className="px-lg-5 py-lg-5">
                 <Row>
                   <Col>
+                    <Input
+                      bsSize="lg"
+                      placeholder="name1"
+                      onChange={e => setName(e.target.value)}
+                      value={name}
+                    />
                     <Button
                       block
                       className="mt-4"
@@ -147,6 +157,12 @@ const TestPage = () => {
                     </Button>
                   </Col>
                   <Col>
+                    <Input
+                      bsSize="lg"
+                      placeholder="name2"
+                      onChange={e => setName2(e.target.value)}
+                      value={name2}
+                    />
                     <Button
                       block
                       className="mt-4"
@@ -171,6 +187,12 @@ const TestPage = () => {
                     </Button>
                   </Col>
                   <Col>
+                    <Input
+                      bsSize="lg"
+                      placeholder="Room Id"
+                      onChange={e => setRoomId(e.target.value)}
+                      value={roomId}
+                    />
                     <Button
                       block
                       className="mt-4"
