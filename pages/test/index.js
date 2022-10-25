@@ -21,39 +21,35 @@ const TestPage = () => {
   const [roomId, setRoomId] = useState('');
 
   useEffect(() => {
-    socket.on('user:error', message => {
+    socket.on('user:error', (message) => {
       console.log(message);
     });
 
-    socket.on('room:error', message => {
+    socket.on('room:error', (message) => {
       console.log(message);
     });
 
-    socket.on('user:login-done', userInfo => {
+    socket.on('user:login-done', (userInfo) => {
       console.log(userInfo);
     });
 
-    socket.on('user:info-done', userInfo => {
-      console.log(userInfo);
-    });
-
-    socket.on('user:get-all-done', userInSocket => {
-      console.log(userInSocket);
-    });
-
-    socket.on('room:create-done', roomDetail => {
+    socket.on('room:create-done', (roomDetail) => {
       console.log(roomDetail);
     });
 
-    socket.on('room:join-done', roomDetail => {
+    socket.on('room:join-done', (roomDetail) => {
       console.log(roomDetail);
     });
 
-    socket.on('room:start-done', gameEl => {
+    socket.on('room:start-done', (gameEl) => {
       console.log(gameEl);
     });
 
-    socket.on('room:starting-done', userInfo => {
+    socket.on('room:leave-done', (userInfo) => {
+      console.log(userInfo);
+    });
+
+    socket.on('room:starting-done', (userInfo) => {
       console.log(userInfo);
     });
 
@@ -80,6 +76,30 @@ const TestPage = () => {
     // socket.on('user:score-done', (userInfo) => {
     //   console.log(userInfo);
     // });
+
+    socket.on('user:get-all-done', (userInSocket) => {
+      console.log(userInSocket);
+    });
+
+    socket.on('user:info-done', (userInfo) => {
+      console.log(userInfo);
+    });
+
+    socket.on('test-done', (data) => {
+      console.log(data);
+    });
+
+    socket.on('room:all-done', (roomInSocket) => {
+      console.log(roomInSocket);
+    });
+
+    socket.on('room:current-done', (roomDetail) => {
+      console.log(roomDetail);
+    });
+
+    socket.on('game:all-done', (gameEls) => {
+      console.log(gameEls);
+    });
   }, []);
 
   const onLogin1 = () => {
@@ -99,7 +119,7 @@ const TestPage = () => {
   };
 
   const onStart = () => {
-    socket.emit('room:start', name, name2);
+    socket.emit('room:start', name, 'jackie');
   };
 
   const onGetAllUser = () => {
@@ -111,20 +131,32 @@ const TestPage = () => {
   };
 
   const onLeave = () => {
+    socket.emit('room:leave');
+  };
+
+  const onStarting = () => {
     socket.emit('room:starting');
   };
 
-  const onCoorUpdate = () => {
+  const onGameUpdate = () => {
     socket.emit('game:update', [0, 0], true);
   };
 
-  // const onRoomDelete = () => {
-  //   socket.emit('room:delete');
-  // };
+  const onCurrentRoom = () => {
+    socket.emit('room:current');
+  };
 
-  // const onCurrentRoom = () => {
-  //   socket.emit('room:current');
-  // };
+  const onAllRoom = () => {
+    socket.emit('room:all');
+  };
+
+  const onTest = () => {
+    socket.emit('test');
+  };
+
+  const onAllGame = () => {
+    socket.emit('game:all');
+  };
 
   return (
     <>
@@ -143,7 +175,7 @@ const TestPage = () => {
                     <Input
                       bsSize="lg"
                       placeholder="name1"
-                      onChange={e => setName(e.target.value)}
+                      onChange={(e) => setName(e.target.value)}
                       value={name}
                     />
                     <Button
@@ -151,7 +183,7 @@ const TestPage = () => {
                       className="mt-4"
                       onClick={onLogin1}
                       size="lg"
-                      color="primary"
+                      color="danger"
                     >
                       user:login1
                     </Button>
@@ -160,7 +192,7 @@ const TestPage = () => {
                     <Input
                       bsSize="lg"
                       placeholder="name2"
-                      onChange={e => setName2(e.target.value)}
+                      onChange={(e) => setName2(e.target.value)}
                       value={name2}
                     />
                     <Button
@@ -168,7 +200,7 @@ const TestPage = () => {
                       className="mt-4"
                       onClick={onLogin2}
                       size="lg"
-                      color="primary"
+                      color="danger"
                     >
                       user:login2
                     </Button>
@@ -190,7 +222,7 @@ const TestPage = () => {
                     <Input
                       bsSize="lg"
                       placeholder="Room Id"
-                      onChange={e => setRoomId(e.target.value)}
+                      onChange={(e) => setRoomId(e.target.value)}
                       value={roomId}
                     />
                     <Button
@@ -227,6 +259,30 @@ const TestPage = () => {
                       room:leave
                     </Button>
                   </Col>
+                  <Col>
+                    <Button
+                      block
+                      className="mt-4"
+                      onClick={onStarting}
+                      size="lg"
+                      color="primary"
+                    >
+                      room:starting
+                    </Button>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <Button
+                      block
+                      className="mt-4"
+                      onClick={onGameUpdate}
+                      size="lg"
+                      style={{ backgroundColor: '#8c26e0' }}
+                    >
+                      game:update
+                    </Button>
+                  </Col>
                 </Row>
                 <Row>
                   <Col>
@@ -235,7 +291,7 @@ const TestPage = () => {
                       className="mt-4"
                       onClick={onGetAllUser}
                       size="lg"
-                      color="primary"
+                      style={{ backgroundColor: '#558747' }}
                     >
                       user:get-all
                     </Button>
@@ -246,57 +302,57 @@ const TestPage = () => {
                       className="mt-4"
                       onClick={onGetUserInfo}
                       size="lg"
-                      color="primary"
+                      style={{ backgroundColor: '#558747' }}
                     >
                       user:info
                     </Button>
                   </Col>
                 </Row>
-                {/* <Row>
-                  <Col>
-                    <Button
-                      block
-                      className="mt-4"
-                      onClick={onCoorUpdate}
-                      size="lg"
-                      style={{ backgroundColor: '#8c26e0' }}
-                    >
-                      coor:update
-                    </Button>
-                  </Col>
-                  <Col>
-                    <Button
-                      block
-                      className="mt-4"
-                      onClick={onLeave}
-                      size="lg"
-                      color="danger"
-                    >
-                      user:leave
-                    </Button>
-                  </Col>
-                  <Col>
-                    <Button
-                      block
-                      className="mt-4"
-                      onClick={onStart}
-                      size="lg"
-                      color="primary"
-                    >
-                      room:start
-                    </Button>
-                  </Col>
-                </Row>*/}
                 <Row>
                   <Col>
                     <Button
                       block
                       className="mt-4"
-                      onClick={onCoorUpdate}
+                      onClick={onTest}
                       size="lg"
                       style={{ backgroundColor: '#558747' }}
                     >
-                      game:update
+                      test
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      block
+                      className="mt-4"
+                      onClick={onAllRoom}
+                      size="lg"
+                      style={{ backgroundColor: '#558747' }}
+                    >
+                      room:all
+                    </Button>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <Button
+                      block
+                      className="mt-4"
+                      onClick={onCurrentRoom}
+                      size="lg"
+                      style={{ backgroundColor: '#558747' }}
+                    >
+                      room:current
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      block
+                      className="mt-4"
+                      onClick={onAllGame}
+                      size="lg"
+                      style={{ backgroundColor: '#558747' }}
+                    >
+                      game:all
                     </Button>
                   </Col>
                 </Row>
