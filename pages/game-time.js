@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import { set } from 'animejs'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Card, Row, Col, Container } from 'reactstrap'
@@ -8,13 +7,6 @@ import { socket } from '../services/socket'
 
 const GamePage = () => {
   const { user } = useSelector((state) => state.user)
-  //const { roomDetails } = useSelector((state) => state.roomDetails)
-  //const { myUser } = gameElement.users.filter(
-  //   (currentUser) => currentUser.name == roomDetails.users.name
-  // )[0]
-  // const { oppoUser } = gameElement.users.filter(
-  //   (currentUser) => currentUser.name != user.opponent.name
-  // )[0]
   const [hCoor, setHCoor] = useState(null)
   const [pCoor, setPCoor] = useState(null)
   const [wCoor, setWCoor] = useState(null)
@@ -28,6 +20,7 @@ const GamePage = () => {
     [0, 0, 1, 0, 'p'],
     [0, 0, 0, 0, 0],
   ])
+
   useEffect(() => {
     socket.emit('room:start')
   }, [])
@@ -39,9 +32,10 @@ const GamePage = () => {
       setHCoor(gameElement.mapDetail.hCoor)
       setPCoor(gameElement.mapDetail.pCoor)
       setWCoor(gameElement.mapDetail.wCoor)
-      const { myUser } = gameElement.users.filter(
-        (currentUser) => currentUser.name == roomDetails.users.name
+      const myUser = gameElement.users.filter(
+        (currentUser) => currentUser.name == user.name
       )[0]
+
       setIsWarder(myUser.isWarder)
       setIsHost(myUser.role === 'host')
       console.log(myUser)
