@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { avatars } from '../variables/avatars';
+import Swal from 'sweetalert2';
 
 import {
   Button,
@@ -19,32 +20,48 @@ import {
   ModalFooter,
 } from 'reactstrap';
 
-import { clearUser } from '../store/features/userSlice';
+import userSlice, { clearUser } from '../store/features/userSlice';
 import { clearCurrentRoom } from '../store/features/roomSlice';
+import { current } from '@reduxjs/toolkit';
 
 const Waiting = () => {
   const { user } = useSelector((state) => state.user);
+  const { opponent } = useSelector((state) => state.user);
   const { currentRoom } = useSelector((state) => state.room);
-  const [userNo, setUserNo] = useState(1);
+  const { currentPlayer } = useSelector((state) => state.room);
 
   const userAvatar = avatars.filter((avatar) => avatar.id === user.avatarId);
+  const opponentAvatar = avatars.filter(
+    (avatar) => avatar.id === opponent.avatarId
+  );
   const userName = user.name;
+  const opponentName = opponent.name;
 
   const dispatch = useDispatch();
 
   const backToIndex = () => {
     dispatch(clearCurrentRoom());
-
     Router.push('/');
   };
 
   const toGameroom = () => {
-    Router.push('/game-time');
+    if (Object.keys(user).length === 0 || Object.keys(opponent).length === 0)
+      Swal.fire({
+        title: 'Error!',
+        timer: 2000,
+        timerProgressBar: true,
+        text: 'Not enough player',
+        icon: 'error',
+        showConfirmButton: false,
+      });
+    else {
+      Router.push('/game-time');
+    }
   };
 
   const [modal, setModal] = useState(false);
   const toggle = () => setModal(!modal);
-  const isHost = () => {};
+  //console.log(currentRoom);
 
   // if (!currentRoom) return;
 
@@ -73,7 +90,9 @@ const Waiting = () => {
                       <CardBody className="text-center fs-1">
                         <span className="fs-3">Room ID</span>
                         <br />
-                        <span className="display-3">{currentRoom}</span>
+                        <span className="display-3">
+                          {currentRoom === null ? '????' : currentRoom.id}
+                        </span>
                       </CardBody>
                     </Col>
                   </Row>
@@ -83,10 +102,19 @@ const Waiting = () => {
                 <Col md="4">
                   <Card className="text-md-center fs-2">
                     <Row>
-                      <span>{userName}</span>
+                      <span>
+                        {Object.keys(user).length === 0 ? 'PLAYER 1' : userName}
+                      </span>
                     </Row>
                     <Row>
-                      <img src={userAvatar[0].img_src} alt="Pacman avatar" />
+                      <img
+                        src={
+                          Object.keys(user).length === 0
+                            ? '/img/default.png'
+                            : userAvatar[0]?.img_src
+                        }
+                        alt="Pacman avatar"
+                      />
                     </Row>
                   </Card>
                 </Col>
@@ -100,18 +128,35 @@ const Waiting = () => {
                 <Col md="4">
                   <Card className="text-md-center fs-2">
                     <Row>
-                      <span>???</span>
+                      <span>
+                        {Object.keys(opponent).length === 0
+                          ? 'PLAYER 2'
+                          : opponentName}
+                      </span>
                       <span></span>
                     </Row>
                     <Row>
-                      <img src={avatars[1].img_src} alt="Pacman avatar" />
+                      <img
+                        src={
+                          Object.keys(opponent).length === 0
+                            ? '/img/default.png'
+                            : opponentAvatar[0]?.img_src
+                        }
+                        alt="Pacman avatar"
+                      />
                     </Row>
                   </Card>
                 </Col>
               </Row>
               <Row className="justify-content-center">
                 <Col md="3" className="text-center">
-                  <Button color="danger" onClick={toGameroom} size="lg">
+                  <Button
+                    color={
+                      Object.keys(opponent).length === 0 ? 'dark' : 'danger'
+                    }
+                    onClick={toGameroom}
+                    size="lg"
+                  >
                     <span className="fs-3">Start</span>
                   </Button>
                 </Col>
@@ -119,7 +164,7 @@ const Waiting = () => {
               <Row>
                 <Col md="4" className="align-vertical-center">
                   <FontAwesomeIcon icon={faUser} size="2x" className="" />
-                  &nbsp;<span className="fs-1">{userNo}</span>
+                  &nbsp;<span className="fs-1">{currentPlayer}</span>
                 </Col>
                 <Col md="4"></Col>
                 <Col md="4">

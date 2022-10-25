@@ -18,8 +18,8 @@ import {
 
 import { avatars } from '../variables/avatars';
 import Swal from 'sweetalert2';
-import { clearUser } from '../store/features/userSlice';
-import { setCurrentRoom } from '../store/features/roomSlice';
+import { setUser, setOpponent } from '../store/features/userSlice';
+import { setCurrentPlayer, setCurrentRoom } from '../store/features/roomSlice';
 
 const LandingPage = () => {
   const [roomId, setRoomId] = useState('');
@@ -28,14 +28,23 @@ const LandingPage = () => {
   const [joinRoom, setJoinRoom] = useState(false);
 
   const dispatch = useDispatch();
+  const invalidRoom = false;
 
   useEffect(() => {
-    socket.on('room:create-done', roomDetails => {
-      // dispatch(setCurrentRoom(roomId));
+    socket.on('room:create-done', (roomDetails) => {
+      dispatch(setCurrentRoom(roomDetails));
+      dispatch(setCurrentPlayer(roomDetails.users.length));
+      dispatch(setUser(roomDetails.users[0]));
+      console.log(roomDetails.users.length);
       console.log(roomDetails);
+      console.log(roomDetails.users[0]);
     });
 
-    socket.on('room:join-done', roomDetails => {
+    socket.on('room:join-done', (roomDetails) => {
+      dispatch(setCurrentRoom(roomDetails));
+      dispatch(setCurrentPlayer(roomDetails.users.length));
+      dispatch(setOpponent(roomDetails.users[1]));
+      console.log(roomDetails.users.length);
       console.log(roomDetails);
     });
   }, []);
@@ -58,25 +67,38 @@ const LandingPage = () => {
       didOpen: () => {
         Swal.showLoading();
 
-        socket.emit('room:join', name.toLowerCase(), selectedAvatarId, roomId);
+        socket.emit('room:join', roomId);
 
-        socket.on('error', message => {
-          if (message === 'no such room') {
+        socket.on('room:error', (message) => {
+          if (message != null) {
             invalidRoom = true;
           }
         });
       },
-    }).then(result => {
-      Swal.fire({
-        title: `Welcome ${name}!`,
-        text: `Joined room ${roomId}`,
-        icon: 'success',
-        showConfirmButton: false,
-        timer: 1500,
-      }).then(result => {
-        setDisJoinButton(false);
-        setRoomId('');
-      });
+    }).then((result) => {
+      if (invalidRoom === true) {
+        Swal.fire({
+          title: `There is no such room`,
+          icon: 'error',
+          showConfirmButton: false,
+          timer: 1500,
+        }).then((result) => {
+          setDisJoinButton(false);
+        });
+      } else {
+        Swal.fire({
+          title: `Welcome ${name}!`,
+          text: `Joined room ${roomId}`,
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 1500,
+        }).then((result) => {
+          setDisJoinButton(false);
+          setRoomId(roomId);
+        });
+        socket.emit('room:join', roomId);
+        Router.push('/waiting-room');
+      }
     });
   };
 
@@ -133,7 +155,7 @@ const LandingPage = () => {
                           className="mt-4"
                           bsSize="lg"
                           placeholder="Enter room id..."
-                          onChange={e => setRoomId(e.target.value)}
+                          onChange={(e) => setRoomId(e.target.value)}
                           value={roomId}
                         />
 
