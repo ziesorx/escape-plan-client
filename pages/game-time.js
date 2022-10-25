@@ -7,12 +7,13 @@ import { socket } from '../services/socket'
 
 const GamePage = () => {
   const { user } = useSelector((state) => state.user)
-  const [hCoor, setHCoor] = useState(null)
-  const [pCoor, setPCoor] = useState(null)
-  const [wCoor, setWCoor] = useState(null)
-  const [isHost, setIsHost] = useState(null)
-  const [isWarder, setIsWarder] = useState(null)
+  const { opponent } = useSelector((state) => state.user)
+  const { currentRoom } = useSelector((state) => state.room)
+  const [isHost, setIsHost] = useState(false)
+  const [isWarder, setIsWarder] = useState(false)
+  const [isWarderTurn, setIsWarderTurn] = useState(true)
   const [isHover, setIsHover] = useState(false)
+  const [alreadyWalk, setAlreadyWalk] = useState(false)
   const [matrix, setMatrix] = useState([
     [0, 0, 0, 0, 'h'],
     ['w', 1, 0, 0, 0],
@@ -20,27 +21,47 @@ const GamePage = () => {
     [0, 0, 1, 0, 'p'],
     [0, 0, 0, 0, 0],
   ])
+  const [timer, setTimer] = useState(10)
+  const [goingCoor, setGoingCoor] = useState(null)
 
   useEffect(() => {
-    socket.emit('room:start')
-  }, [])
+    // user.name === currentRoom?.users.filter((user) => !!user.isHost)[0].name &&
+    //   setIsHost(true)
 
-  useEffect(() => {
+    // isHost && socket.emit('room:start', user.name, opponent.name)
+    socket.emit('room:start', 'kuay', 'kuay2')
+
     socket.on('room:start-done', (gameElement) => {
       console.log(gameElement)
       setMatrix(gameElement.mapDetail.map)
-      setHCoor(gameElement.mapDetail.hCoor)
-      setPCoor(gameElement.mapDetail.pCoor)
-      setWCoor(gameElement.mapDetail.wCoor)
-      const myUser = gameElement.users.filter(
-        (currentUser) => currentUser.name == user.name
-      )[0]
-
-      setIsWarder(myUser.isWarder)
-      setIsHost(myUser.role === 'host')
-      console.log(myUser)
+      // const myUser = gameElement.users.filter(
+      //   (currentUser) => currentUser.name == user.name
+      // )[0]
+      setIsWarder(true)
     })
-  })
+
+    socket.on('game:update-done', (newCoor) => {
+      console.log(newCoor)
+      setMatrix(newCoor.map)
+      setAlreadyWalk(false)
+      setIsWarderTurn(newCoor.isWarderTurn)
+    })
+  }, [])
+
+  useEffect(() => {
+    timer > 0 && setTimeout(() => setTimer((prev) => prev - 1), 1000)
+
+    if (timer === 0) {
+      setIsWarderTurn((prev) => !prev)
+      socket.emit('game:update', goingCoor, isWarderTurn)
+      // updateBoard()
+    }
+  }, [timer])
+
+  useEffect(() => {
+    setTimer(10)
+  }, [isWarderTurn])
+
   const findPos = (array, symbol) => {
     const string = array.toString().replace(/,/g, '')
     const pos = string.indexOf(symbol)
@@ -56,7 +77,7 @@ const GamePage = () => {
   const highlightTile = (coord) => {
     const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p')
 
-    if (isHover) {
+    if (isWarder === isWarderTurn && !alreadyWalk && isHover) {
       if (
         matrix[coord.y][coord.x] !== 1 &&
         ((coord.y === charCoor.y + 1 && coord.x === charCoor.x) ||
@@ -125,7 +146,7 @@ const GamePage = () => {
     return <div className="free-space-tile"></div>
   }
 
-  const updateBoard = (rowIdx, columnIdx) => {
+  const updateCurrentBoard = (rowIdx, columnIdx) => {
     const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p')
 
     if (
@@ -134,9 +155,11 @@ const GamePage = () => {
         !(rowIdx === charCoor.y - 1 && columnIdx === charCoor.x) &&
         !(rowIdx === charCoor.y && columnIdx === charCoor.x + 1) &&
         !(rowIdx === charCoor.y && columnIdx === charCoor.x - 1))
-    ) {
+    )
       return
-    }
+
+    setGoingCoor([rowIdx, columnIdx])
+    setAlreadyWalk(true)
 
     setMatrix((prevBoard) => {
       const newBoard = [...prevBoard]
@@ -160,11 +183,13 @@ const GamePage = () => {
             }}
           >
             <Header
-              myImg={'/img/Bluepackman.png'}
-              oppoImg={'/img/Greenpackman.png'}
-              isWarder={true}
-              myScore={2}
-              oppoScore={300}
+              myImg={user.avatarId}
+              oppoImg={opponent.avatarId}
+              isWarder={isWarder}
+              myScore={user.score}
+              oppoScore={opponent.score}
+              timer={timer}
+              isWarderTurn={isWarderTurn}
             />
 
             <Row className="justify-content-center mx-auto">
@@ -186,7 +211,9 @@ const GamePage = () => {
                               { x: columnIdx, y: rowIdx }
                             )}`}
                             onClick={() => {
-                              updateBoard(rowIdx, columnIdx)
+                              if (isWarder === isWarderTurn && !alreadyWalk) {
+                                updateCurrentBoard(rowIdx, columnIdx)
+                              }
                             }}
                           >
                             {renderCharacter(column)}
