@@ -56,6 +56,14 @@ const TestPage = () => {
     socket.on('user:score-done', (userInfo) => {
       console.log(userInfo);
     });
+
+    socket.on('user-error', (message) => {
+      console.log(message);
+    });
+
+    socket.on('room-error', (message) => {
+      console.log(message);
+    });
   }, []);
 
   const onCreate = () => {
