@@ -12,13 +12,13 @@ const userSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
     },
-    clearUser: state => {
+    clearUser: (state) => {
       state.user = {};
     },
     setOpponent: (state, action) => {
       state.opponent = action.payload;
     },
-    clearOpponent: state => {
+    clearOpponent: (state) => {
       state.opponent = {};
     },
   },
