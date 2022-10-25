@@ -12,17 +12,24 @@ const roomSlice = createSlice({
     setCurrentRoom: (state, action) => {
       state.currentRoom = action.payload;
     },
-    clearCurrentRoom: (state) => {
+    clearCurrentRoom: state => {
       state.currentRoom = null;
     },
     setCurrentPlayer: (state, action) => {
       state.currentPlayer = action.payload;
     },
+    clearCurrentPlayer: state => {
+      state.currentPlayer = null;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setCurrentRoom, clearCurrentRoom, setCurrentPlayer } =
-  roomSlice.actions;
+export const {
+  setCurrentRoom,
+  clearCurrentRoom,
+  setCurrentPlayer,
+  clearCurrentPlayer,
+} = roomSlice.actions;
 
 export default roomSlice.reducer;

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { socket } from '../services/socket';
 import Router from 'next/router';
 import {
@@ -26,28 +26,50 @@ const LandingPage = () => {
   const [disCreateButton, setDisCreateButton] = useState(false);
   const [disJoinButton, setDisJoinButton] = useState(false);
   const [joinRoom, setJoinRoom] = useState(false);
+  const { user } = useSelector(state => state.user);
 
   const dispatch = useDispatch();
   const invalidRoom = false;
 
   useEffect(() => {
-    socket.on('room:create-done', (roomDetails) => {
+    socket.on('room:create-done', roomDetails => {
       dispatch(setCurrentRoom(roomDetails));
       dispatch(setCurrentPlayer(roomDetails.users.length));
       dispatch(setUser(roomDetails.users[0]));
       console.log(roomDetails.users.length);
-      console.log(roomDetails);
       console.log(roomDetails.users[0]);
+      // checkHost();
     });
 
-    socket.on('room:join-done', (roomDetails) => {
+    socket.on('room:join-done', roomDetails => {
       dispatch(setCurrentRoom(roomDetails));
       dispatch(setCurrentPlayer(roomDetails.users.length));
-      dispatch(setOpponent(roomDetails.users[1]));
       console.log(roomDetails.users.length);
       console.log(roomDetails);
+      if (user.name === roomDetails.users[0].name) {
+        dispatch(setUser(roomDetails.users[0]));
+        dispatch(setOpponent(roomDetails.users[1]));
+      } else {
+        dispatch(setUser(roomDetails.users[1]));
+        dispatch(setOpponent(roomDetails.users[0]));
+      }
+      // checkHost();
     });
   }, []);
+
+  // const checkHost = () => {
+  //   roomDetails.users.forEach((userDetail) => {
+  //     if (user.name === userDetail.name) {
+  //       console.log(userDetail.isHost);
+  //       if (userDetail.isHost === true) {
+  //         dispatch(setOpponent(roomDetails.users[1]));
+  //       }
+  //       if (userDetail.isHost === false) {
+  //         dispatch(setOpponent(userDetail));
+  //       }
+  //     }
+  //   });
+  // };
 
   const onCreateClick = () => {
     setDisCreateButton(true);
@@ -69,20 +91,20 @@ const LandingPage = () => {
 
         socket.emit('room:join', roomId);
 
-        socket.on('room:error', (message) => {
+        socket.on('room:error', message => {
           if (message != null) {
             invalidRoom = true;
           }
         });
       },
-    }).then((result) => {
+    }).then(result => {
       if (invalidRoom === true) {
         Swal.fire({
           title: `There is no such room`,
           icon: 'error',
           showConfirmButton: false,
           timer: 1500,
-        }).then((result) => {
+        }).then(result => {
           setDisJoinButton(false);
         });
       } else {
@@ -92,7 +114,7 @@ const LandingPage = () => {
           icon: 'success',
           showConfirmButton: false,
           timer: 1500,
-        }).then((result) => {
+        }).then(result => {
           setDisJoinButton(false);
           setRoomId(roomId);
         });
@@ -155,7 +177,7 @@ const LandingPage = () => {
                           className="mt-4"
                           bsSize="lg"
                           placeholder="Enter room id..."
-                          onChange={(e) => setRoomId(e.target.value)}
+                          onChange={e => setRoomId(e.target.value)}
                           value={roomId}
                         />
 
