@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import Timer from './Timer'
-import { avatars } from '../variables/avatars'
-import { Col, Row } from 'reactstrap'
+import { avatars } from '../variables/avatars';
+import { Col, Row } from 'reactstrap';
+import { useEffect, useState } from 'react';
 
 const Header = ({
   myName,
@@ -12,8 +12,13 @@ const Header = ({
   myScore,
   oppoScore,
 }) => {
-  const role = isWarder == false ? 'prisoner' : 'warder'
-  const oppoRole = isWarder == false ? 'warder' : 'prisoner'
+  const role = isWarder == false ? 'prisoner' : 'warder';
+  const oppoRole = isWarder == false ? 'warder' : 'prisoner';
+  const [timer, setTimer] = useState(10);
+
+  useEffect(() => {
+    timer > 0 && setTimeout(() => setTimer(prev => prev - 1), 1000);
+  }, [timer]);
 
   return (
     <header className="row justify-content-between">
@@ -32,9 +37,7 @@ const Header = ({
         <h4>SCORE : {myScore}</h4>
       </div>
       <div className="col-4 text-center">
-        <span>
-          <Timer />
-        </span>
+        <span className="display-3">{timer}</span>
         <h3 className="mb-0">turn </h3>
         {/* <p className="display-3">{round ?? 1}</p> */}
       </div>
@@ -53,7 +56,7 @@ const Header = ({
         <h4>SCORE : {oppoScore}</h4>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
