@@ -38,7 +38,6 @@ const LandingPage = () => {
       dispatch(setUser(roomDetails.users[0]));
       console.log(roomDetails.users.length);
       console.log(roomDetails.users[0]);
-      // checkHost();
     });
 
     socket.on('room:join-done', roomDetails => {
@@ -53,23 +52,8 @@ const LandingPage = () => {
         dispatch(setUser(roomDetails.users[1]));
         dispatch(setOpponent(roomDetails.users[0]));
       }
-      // checkHost();
     });
   }, []);
-
-  // const checkHost = () => {
-  //   roomDetails.users.forEach((userDetail) => {
-  //     if (user.name === userDetail.name) {
-  //       console.log(userDetail.isHost);
-  //       if (userDetail.isHost === true) {
-  //         dispatch(setOpponent(roomDetails.users[1]));
-  //       }
-  //       if (userDetail.isHost === false) {
-  //         dispatch(setOpponent(userDetail));
-  //       }
-  //     }
-  //   });
-  // };
 
   const onCreateClick = () => {
     setDisCreateButton(true);
