@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import { set } from 'animejs'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Card, Row, Col, Container } from 'reactstrap'
@@ -21,6 +20,7 @@ const GamePage = () => {
     [0, 0, 1, 0, 'p'],
     [0, 0, 0, 0, 0],
   ])
+
   useEffect(() => {
     socket.emit('room:start')
   }, [])
