@@ -49,7 +49,7 @@ const TestPage = () => {
       console.log(gameEl);
     });
 
-    socket.on('room:leave-done', (userInfo) => {
+    socket.on('room:starting-done', (userInfo) => {
       console.log(userInfo);
     });
 
@@ -61,9 +61,9 @@ const TestPage = () => {
     //   console.log(socketRooms);
     // });
 
-    // socket.on('game:coor-done', (coor, isWarder) => {
-    //   console.log(coor, isWarder);
-    // });
+    socket.on('game:update-done', (coor, isWarderTurn) => {
+      console.log(coor, isWarderTurn);
+    });
 
     // socket.on('game:again-done', (gameEl) => {
     //   console.log(gameEl);
@@ -107,16 +107,12 @@ const TestPage = () => {
   };
 
   const onLeave = () => {
-    socket.emit('room:leave');
+    socket.emit('room:starting');
   };
 
-  // const onDisconnect = () => {
-  //   socket.emit('disconnect');
-  // };
-
-  // const onCoorUpdate = () => {
-  //   socket.emit('coor:update');
-  // };
+  const onCoorUpdate = () => {
+    socket.emit('game:update', [0, 0], true);
+  };
 
   // const onRoomDelete = () => {
   //   socket.emit('room:delete');
@@ -268,20 +264,20 @@ const TestPage = () => {
                       room:start
                     </Button>
                   </Col>
-                </Row>
+                </Row>*/}
                 <Row>
                   <Col>
                     <Button
                       block
                       className="mt-4"
-                      onClick={onDisconnect}
+                      onClick={onCoorUpdate}
                       size="lg"
                       style={{ backgroundColor: '#558747' }}
                     >
-                      disconnect
+                      game:update
                     </Button>
                   </Col>
-                </Row> */}
+                </Row>
               </CardBody>
             </Card>
           </Col>
