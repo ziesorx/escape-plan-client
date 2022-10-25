@@ -27,26 +27,23 @@ const Auth = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    socket.on('user:login-done', (userInfo) => {
+    socket.on('user:login-done', userInfo => {
       dispatch(setUser(userInfo));
 
       Router.push('/main-menu');
     });
-    // socket.on('user:login-done', (userInfo) => {
-    //   dispatch(setOpponent(userInfo));
-    // });
   }, []);
 
   const renderSpinner = () => {
     return <Spinner animation="border" role="status" size="sm"></Spinner>;
   };
 
-  const renderAvatar = (avatar) => {
+  const renderAvatar = avatar => {
     return (
       <Button
         key={avatar.id}
         className="avatar bg-transparent border-0"
-        onClick={(e) => {
+        onClick={e => {
           e.preventDefault();
           setSelectedAvatarId(avatar.id);
         }}
@@ -63,6 +60,8 @@ const Auth = () => {
   };
 
   const onLoginClick = () => {
+    setDisButton(true);
+
     socket.emit('user:login', name, selectedAvatarId);
   };
 
@@ -87,7 +86,7 @@ const Auth = () => {
                     <Input
                       bsSize="lg"
                       placeholder="Enter your name..."
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={e => setName(e.target.value)}
                       value={name}
                     />
                   </Col>
@@ -95,7 +94,7 @@ const Auth = () => {
 
                 <Row className="mt-4">
                   <ButtonGroup className="justify-content-between">
-                    {avatars.map((avatar) => renderAvatar(avatar))}
+                    {avatars.map(avatar => renderAvatar(avatar))}
                   </ButtonGroup>
                 </Row>
 
