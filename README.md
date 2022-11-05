@@ -13,6 +13,6 @@ We are using mainly Next.js and socket.io to make this project.
 
 We are not be focusing too much on styling as this project is all about how socket actually work and to implement a simple socket programming client-server application.
 
-<font size="5"> [Click here for a live Demo of the final game](https://nextjs.org/) </font>
+[<font size="5">**Click here for a live Demo of the final game**</font>](https://nextjs.org/)
 
 Thanks for stopping by! If you like this project, feel free to try the game 🤗.
