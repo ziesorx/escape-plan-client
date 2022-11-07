@@ -1,12 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import { WrappedBuildError } from 'next/dist/server/base-server';
+import { Router } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, Row, Col, Container } from 'reactstrap';
 import Swal from 'sweetalert2';
 import Header from '../components/Header';
 import { socket } from '../services/socket';
+import {
+  clearCurrentPlayer,
+  clearCurrentRoom,
+} from '../store/features/roomSlice';
+import {
+  clearOpponent,
+  setOpponent,
+  setUser,
+} from '../store/features/userSlice';
 
 const GamePage = () => {
   const { user } = useSelector(state => state.user);
@@ -43,6 +53,9 @@ const GamePage = () => {
 
     socket.on('game:end-done', (gameElement, winnerUserInfo) => {
       setTimer(-1);
+      const myUser = gameElement.users.filter(
+        currentUser => currentUser.name === user.name
+      )[0];
       const winUser = gameElement.users.filter(
         user => user.name === winnerUserInfo.name
       )[0];
@@ -51,34 +64,47 @@ const GamePage = () => {
         Swal.fire({
           title: `${winnerUserInfo.name} (${
             winUser.isWarder ? 'Warder' : 'Prisoner'
-          }) is win!`,
+          }) win!`,
           text: `Waiting for host to start over...`,
           showDenyButton: true,
           confirmButtonText: 'Play again?',
           denyButtonText: `Leave room`,
           allowOutsideClick: false,
         }).then(result => {
+          if (winnerUserInfo.name === user.name) setUser(winnerUserInfo);
+          else setOpponent(winnerUserInfo);
+
           if (result.isConfirmed) {
             Swal.fire('kuay wai gorn');
           } else if (result.isDenied) {
-            Swal.fire('ook pai');
+            dispatch(clearCurrentRoom());
+            dispatch(clearCurrentPlayer());
+            dispatch(clearOpponent());
+            Router.push('main-menu');
           }
         });
       else
         Swal.fire({
           title: `${winnerUserInfo.name} (${
             winUser.isWarder ? 'Warder' : 'Prisoner'
-          }) is win!`,
+          }) win!`,
           text: `Waiting for host to start over...`,
           showDenyButton: true,
           showConfirmButton: false,
           denyButtonText: `Leave room`,
           allowOutsideClick: false,
         }).then(result => {
+          if (winnerUserInfo.name === user.name) setUser(winnerUserInfo);
+          else setOpponent(winnerUserInfo);
+
           if (result.isConfirmed) {
             // socket.emit('game:play-again')
+            Swal.fire('kuay wai gorn');
           } else if (result.isDenied) {
-            Swal.fire('ook pai');
+            dispatch(clearCurrentRoom());
+            dispatch(clearCurrentPlayer());
+            dispatch(clearOpponent());
+            Router.push('main-menu');
           }
         });
     });
