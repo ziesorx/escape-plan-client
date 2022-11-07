@@ -20,28 +20,87 @@ import {
   ModalFooter,
 } from 'reactstrap';
 
-import userSlice, { clearUser } from '../store/features/userSlice';
-import { clearCurrentRoom } from '../store/features/roomSlice';
+import userSlice, {
+  clearOpponent,
+  clearUser,
+  setUser,
+} from '../store/features/userSlice';
+import {
+  clearCurrentPlayer,
+  clearCurrentRoom,
+  setCurrentPlayer,
+} from '../store/features/roomSlice';
 import { current } from '@reduxjs/toolkit';
+import { socket } from '../services/socket';
 
 const Waiting = () => {
-  const { user } = useSelector((state) => state.user);
-  const { opponent } = useSelector((state) => state.user);
-  const { currentRoom } = useSelector((state) => state.room);
-  const { currentPlayer } = useSelector((state) => state.room);
+  const { user } = useSelector(state => state.user);
+  const { opponent } = useSelector(state => state.user);
+  const { currentRoom } = useSelector(state => state.room);
+  const { currentPlayer } = useSelector(state => state.room);
+  const [isPlayerLeft, setIsPlayerLeft] = useState(false);
 
-  const userAvatar = avatars.filter((avatar) => avatar.id === user.avatarId);
+  const userAvatar = avatars.filter(avatar => avatar.id === user.avatarId);
   const opponentAvatar = avatars.filter(
-    (avatar) => avatar.id === opponent.avatarId
+    avatar => avatar.id === opponent.avatarId
   );
   const userName = user.name;
   const opponentName = opponent.name;
 
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    socket.on('room:starting-done', message => {
+      let timerInterval;
+      Swal.fire({
+        title: 'GAME STARTED!',
+        html: 'Game will start in <strong></strong> seconds. <br></br>',
+        timer: 5300,
+        timerProgressBar: true,
+        didOpen: () => {
+          Swal.showLoading();
+          const b = Swal.getHtmlContainer().querySelector('strong');
+          timerInterval = setInterval(() => {
+            b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0);
+          }, 100);
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        },
+      }).then(result => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+          console.log(message);
+          !!message && Router.push('/game-time');
+        }
+      });
+    });
+
+    socket.on('room:leave-done', roomDetails => {
+      dispatch(setCurrentPlayer(roomDetails.users.length));
+      dispatch(clearOpponent());
+      console.log(roomDetails);
+      setIsPlayerLeft(prev => !prev);
+      dispatch(setUser({ ...user, isHost: true }));
+    });
+  }, []);
+
+  useEffect(() => {
+    if (user.isHost && isPlayerLeft)
+      Swal.fire({
+        title: 'YOU ARE HOST!',
+        timer: 2000,
+        timerProgressBar: true,
+        icon: 'warning',
+        showConfirmButton: false,
+      }).then(result => setIsPlayerLeft(prev => !prev));
+  }, [user.isHost, isPlayerLeft]);
+
   const backToIndex = () => {
     dispatch(clearCurrentRoom());
-    Router.push('/');
+    dispatch(clearCurrentPlayer());
+    dispatch(clearOpponent());
+    socket.emit('room:leave');
+    Router.push('/main-menu');
   };
 
   const toGameroom = () => {
@@ -55,7 +114,8 @@ const Waiting = () => {
         showConfirmButton: false,
       });
     else {
-      Router.push('/game-time');
+      console.log('starting');
+      socket.emit('room:starting');
     }
   };
 
@@ -64,6 +124,14 @@ const Waiting = () => {
   //console.log(currentRoom);
 
   // if (!currentRoom) return;
+
+  const renderButton = () => {
+    return (
+      <Button color="danger" onClick={toGameroom} size="lg">
+        <span className="fs-3">Start</span>
+      </Button>
+    );
+  };
 
   return (
     <Container className="px-0">
@@ -103,7 +171,7 @@ const Waiting = () => {
                   <Card className="text-md-center fs-2">
                     <Row>
                       <span>
-                        {Object.keys(user).length === 0 ? 'PLAYER 1' : userName}
+                        {Object.keys(user).length === 0 ? '???' : userName}
                       </span>
                     </Row>
                     <Row>
@@ -130,7 +198,7 @@ const Waiting = () => {
                     <Row>
                       <span>
                         {Object.keys(opponent).length === 0
-                          ? 'PLAYER 2'
+                          ? '???'
                           : opponentName}
                       </span>
                       <span></span>
@@ -150,15 +218,7 @@ const Waiting = () => {
               </Row>
               <Row className="justify-content-center">
                 <Col md="3" className="text-center">
-                  <Button
-                    color={
-                      Object.keys(opponent).length === 0 ? 'dark' : 'danger'
-                    }
-                    onClick={toGameroom}
-                    size="lg"
-                  >
-                    <span className="fs-3">Start</span>
-                  </Button>
+                  {user.isHost && renderButton()}
                 </Col>
               </Row>
               <Row>
