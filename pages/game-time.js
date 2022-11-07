@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
-import { WrappedBuildError } from 'next/dist/server/base-server';
-import { Router } from 'next/router';
+import Router from 'next/router';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Card, Row, Col, Container } from 'reactstrap';
 import Swal from 'sweetalert2';
 import Header from '../components/Header';
@@ -31,9 +30,12 @@ const GamePage = () => {
   const [timer, setTimer] = useState(10);
   const [goingCoor, setGoingCoor] = useState(null);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    user.name === currentRoom?.users.filter(user => !!user.isHost)[0].name &&
+    if (currentRoom.users.find(user => !!user.isHost).name === user.name)
       setIsHost(true);
+    else console.log('you aint host');
 
     socket.on('room:start-done', gameElement => {
       console.log(gameElement);
@@ -42,6 +44,15 @@ const GamePage = () => {
         currentUser => currentUser.name === user.name
       )[0];
       setIsWarder(myUser.isWarder);
+    });
+
+    socket.on('room:play-again-done', gameElement => {
+      setMatrix(gameElement.mapDetail.map);
+      const myUser = gameElement.users.filter(
+        currentUser => currentUser.name === user.name
+      )[0];
+      setIsWarder(myUser.isWarder);
+      setIsWarderTurn(true);
     });
 
     socket.on('game:update-done', newCoor => {
@@ -53,12 +64,13 @@ const GamePage = () => {
 
     socket.on('game:end-done', (gameElement, winnerUserInfo) => {
       setTimer(-1);
-      const myUser = gameElement.users.filter(
-        currentUser => currentUser.name === user.name
-      )[0];
+      console.log(winnerUserInfo);
       const winUser = gameElement.users.filter(
         user => user.name === winnerUserInfo.name
       )[0];
+
+      if (winnerUserInfo.name === user.name) dispatch(setUser(winnerUserInfo));
+      else dispatch(setOpponent(winnerUserInfo));
 
       if (user.isHost)
         Swal.fire({
@@ -71,11 +83,8 @@ const GamePage = () => {
           denyButtonText: `Leave room`,
           allowOutsideClick: false,
         }).then(result => {
-          if (winnerUserInfo.name === user.name) setUser(winnerUserInfo);
-          else setOpponent(winnerUserInfo);
-
           if (result.isConfirmed) {
-            Swal.fire('kuay wai gorn');
+            socket.emit('room:play-again', winUser.name);
           } else if (result.isDenied) {
             dispatch(clearCurrentRoom());
             dispatch(clearCurrentPlayer());
@@ -94,13 +103,7 @@ const GamePage = () => {
           denyButtonText: `Leave room`,
           allowOutsideClick: false,
         }).then(result => {
-          if (winnerUserInfo.name === user.name) setUser(winnerUserInfo);
-          else setOpponent(winnerUserInfo);
-
-          if (result.isConfirmed) {
-            // socket.emit('game:play-again')
-            Swal.fire('kuay wai gorn');
-          } else if (result.isDenied) {
+          if (result.isDenied) {
             dispatch(clearCurrentRoom());
             dispatch(clearCurrentPlayer());
             dispatch(clearOpponent());
@@ -111,7 +114,9 @@ const GamePage = () => {
   }, []);
 
   useEffect(() => {
-    if (isHost) socket.emit('room:start', user.name, opponent.name);
+    if (!isHost) return;
+
+    socket.emit('room:start', user.name, opponent.name);
   }, [isHost]);
 
   useEffect(() => {
