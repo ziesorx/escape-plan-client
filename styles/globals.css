@@ -67,6 +67,15 @@ a {
   background-color: rgba(255, 255, 0, 0.3);
 }
 
+.danger-highlighted {
+  background-color: rgba(206, 10, 10, 0.465);
+  cursor: not-allowed;
+}
+
+.success-highlighted {
+  background-color: rgba(48, 200, 42, 0.3);
+}
+
 .main-card {
   background-color: rgba(255, 255, 255, 0.8);
   border: 3px solid white;
