@@ -41,25 +41,46 @@ const GamePage = () => {
       setIsWarderTurn(newCoor.isWarderTurn);
     });
 
-    socket.on('game:end-done', winnerUserInfo => {
+    socket.on('game:end-done', (gameElement, winnerUserInfo) => {
       setTimer(-1);
       const winUser = gameElement.users.filter(
         user => user.name === winnerUserInfo.name
       )[0];
 
-      Swal.fire({
-        title: `${winUser.isWarder ? 'Warder' : 'Prisoner'} is win!`,
-        text: `Congratz ${winnerUserInfo.name}!!`,
-        showDenyButton: true,
-        confirmButtonText: 'Play again?',
-        denyButtonText: `Leave room`,
-      }).then(result => {
-        if (result.isConfirmed) {
-          Swal.fire('kuay wai gorn');
-        } else if (result.isDenied) {
-          Swal.fire('ook pai');
-        }
-      });
+      if (user.isHost)
+        Swal.fire({
+          title: `${winnerUserInfo.name} (${
+            winUser.isWarder ? 'Warder' : 'Prisoner'
+          }) is win!`,
+          text: `Waiting for host to start over...`,
+          showDenyButton: true,
+          confirmButtonText: 'Play again?',
+          denyButtonText: `Leave room`,
+          allowOutsideClick: false,
+        }).then(result => {
+          if (result.isConfirmed) {
+            Swal.fire('kuay wai gorn');
+          } else if (result.isDenied) {
+            Swal.fire('ook pai');
+          }
+        });
+      else
+        Swal.fire({
+          title: `${winnerUserInfo.name} (${
+            winUser.isWarder ? 'Warder' : 'Prisoner'
+          }) is win!`,
+          text: `Waiting for host to start over...`,
+          showDenyButton: true,
+          showConfirmButton: false,
+          denyButtonText: `Leave room`,
+          allowOutsideClick: false,
+        }).then(result => {
+          if (result.isConfirmed) {
+            // socket.emit('game:play-again')
+          } else if (result.isDenied) {
+            Swal.fire('ook pai');
+          }
+        });
     });
   }, []);
 

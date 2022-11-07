@@ -34,7 +34,7 @@ const Header = ({
         <h4>SCORE : {myScore}</h4>
       </div>
       <div className="col-4 text-center">
-        <span className="display-3">{timer === -1 ? 'time out' : timer}</span>
+        <span className="display-3">{timer === -1 ? 'Ended' : timer}</span>
         <h3 className="mb-0">{isWarderTurn ? 'Warder' : 'Prisoner'} turn</h3>
         {/* <p className="display-3">{round ?? 1}</p> */}
       </div>
