@@ -53,6 +53,7 @@ const Waiting = () => {
     socket.on('room:starting-done', message => {
       let timerInterval;
       Swal.fire({
+        allowOutsideClick: false,
         title: 'GAME STARTED!',
         html: 'Game will start in <strong></strong> seconds. <br></br>',
         timer: 5300,

@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import { avatars } from '../variables/avatars'
-import { Col, Row } from 'reactstrap'
-import { useEffect, useState } from 'react'
+import { avatars } from '../variables/avatars';
+import { Col, Row } from 'reactstrap';
+import { useEffect, useState } from 'react';
 
 const Header = ({
   myName,
@@ -14,8 +14,8 @@ const Header = ({
   timer,
   isWarderTurn,
 }) => {
-  const role = isWarder == false ? 'prisoner' : 'warder'
-  const oppoRole = isWarder == false ? 'warder' : 'prisoner'
+  const role = isWarder == false ? 'prisoner' : 'warder';
+  const oppoRole = isWarder == false ? 'warder' : 'prisoner';
 
   return (
     <header className="row justify-content-between">
@@ -23,7 +23,7 @@ const Header = ({
         <div className="d-flex align-items-center">
           <img
             alt="profile picture"
-            src={avatars.find((avatar) => avatar.id === myImg)?.img_src}
+            src={avatars.find(avatar => avatar.id === myImg)?.img_src}
             className="img-fluid rounded-circle w-25"
             style={{ objectFit: 'fill', aspectRatio: '1' }}
           />
@@ -40,10 +40,10 @@ const Header = ({
       </div>
       <div className="col-4 d-flex flex-column align-items-end">
         <div className=" d-flex align-items-center justify-content-end">
-          <span className="h4 mb-0">{myName ?? 'poraor'}</span>
+          <span className="h4 mb-0">{oppoName ?? 'poraor'}</span>
           <img
             alt="profile picture"
-            src={avatars.find((avatar) => avatar.id === oppoImg)?.img_src}
+            src={avatars.find(avatar => avatar.id === oppoImg)?.img_src}
             className="img-fluid rounded-circle w-25"
             style={{ objectFit: 'fill', aspectRatio: '1' }}
           />
@@ -53,7 +53,7 @@ const Header = ({
         <h4>SCORE : {oppoScore}</h4>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

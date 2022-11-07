@@ -15,13 +15,7 @@ const GamePage = () => {
   const [isWarderTurn, setIsWarderTurn] = useState(true);
   const [isHover, setIsHover] = useState(false);
   const [alreadyWalk, setAlreadyWalk] = useState(false);
-  const [matrix, setMatrix] = useState([
-    [0, 0, 0, 0, 'h'],
-    ['w', 1, 0, 0, 0],
-    [1, 1, 1, 0, 0],
-    [0, 0, 1, 0, 'p'],
-    [0, 0, 0, 0, 0],
-  ]);
+  const [matrix, setMatrix] = useState(null);
   const [timer, setTimer] = useState(10);
   const [goingCoor, setGoingCoor] = useState(null);
 
@@ -175,6 +169,8 @@ const GamePage = () => {
     });
   };
 
+  if (!matrix) return;
+
   return (
     <Container className="mt--6" fluid>
       <Row className="justify-content-center mx-auto">
@@ -188,6 +184,8 @@ const GamePage = () => {
             <Header
               myImg={user.avatarId}
               oppoImg={opponent.avatarId}
+              myName={user.name}
+              oppoName={opponent.name}
               isWarder={isWarder}
               myScore={user.score}
               oppoScore={opponent.score}
