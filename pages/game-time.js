@@ -20,8 +20,7 @@ import {
 const GamePage = () => {
   const { user } = useSelector(state => state.user);
   const { opponent } = useSelector(state => state.user);
-  const { currentRoom } = useSelector(state => state.room);
-  const [isHost, setIsHost] = useState(false);
+  const { currentGame } = useSelector(state => state.room);
   const [isWarder, setIsWarder] = useState(false);
   const [isWarderTurn, setIsWarderTurn] = useState(true);
   const [isHover, setIsHover] = useState(false);
@@ -32,27 +31,50 @@ const GamePage = () => {
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (currentRoom.users.find(user => !!user.isHost).name === user.name)
-      setIsHost(true);
-    else console.log('you aint host');
+  const setWarder = gameElement => {
+    console.log(gameElement);
+    const myUser = gameElement.users.filter(
+      currentUser => currentUser.name === user.name
+    )[0];
+    setIsWarder(myUser.isWarder);
+  };
 
-    socket.on('room:start-done', gameElement => {
-      console.log(gameElement);
-      setMatrix(gameElement.mapDetail.map);
-      const myUser = gameElement.users.filter(
-        currentUser => currentUser.name === user.name
-      )[0];
-      setIsWarder(myUser.isWarder);
-    });
+  useEffect(() => {
+    setMatrix(currentGame.mapDetail.map);
+    setWarder(currentGame);
 
     socket.on('room:play-again-done', gameElement => {
-      setMatrix(gameElement.mapDetail.map);
-      const myUser = gameElement.users.filter(
-        currentUser => currentUser.name === user.name
-      )[0];
-      setIsWarder(myUser.isWarder);
-      setIsWarderTurn(true);
+      let timerInterval;
+      Swal.fire({
+        allowOutsideClick: false,
+        title: 'NEW GAME IS STARTING!',
+        html: 'Game will start in <strong></strong> seconds. <br></br>',
+        timer: 5300,
+        timerProgressBar: true,
+        didOpen: () => {
+          Swal.showLoading();
+          const b = Swal.getHtmlContainer().querySelector('strong');
+          timerInterval = setInterval(() => {
+            b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0);
+          }, 100);
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        },
+      }).then(result => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+          console.log(gameElement);
+          setMatrix(gameElement.mapDetail.map);
+          const myUser = gameElement.users.filter(
+            currentUser => currentUser.name === user.name
+          )[0];
+          setIsWarder(myUser.isWarder);
+          setAlreadyWalk(false);
+          setGoingCoor(null);
+          setIsWarderTurn(true);
+          setTimer(10);
+        }
+      });
     });
 
     socket.on('game:update-done', newCoor => {
@@ -112,12 +134,6 @@ const GamePage = () => {
         });
     });
   }, []);
-
-  useEffect(() => {
-    if (!isHost) return;
-
-    socket.emit('room:start', user.name, opponent.name);
-  }, [isHost]);
 
   useEffect(() => {
     if (timer === -1) return;
@@ -281,7 +297,6 @@ const GamePage = () => {
         columnIdx === findPos(matrix, 'h').x
       ) {
         socket.emit('game:end');
-        return;
       }
 
       newBoard[charCoor.y] = [...newBoard[charCoor.y]];

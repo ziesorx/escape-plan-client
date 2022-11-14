@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import Router from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -28,6 +29,7 @@ import userSlice, {
 import {
   clearCurrentPlayer,
   clearCurrentRoom,
+  setCurrentGame,
   setCurrentPlayer,
 } from '../store/features/roomSlice';
 import { current } from '@reduxjs/toolkit';
@@ -50,30 +52,8 @@ const Waiting = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    socket.on('room:starting-done', message => {
-      let timerInterval;
-      Swal.fire({
-        allowOutsideClick: false,
-        title: 'GAME STARTED!',
-        html: 'Game will start in <strong></strong> seconds. <br></br>',
-        timer: 5300,
-        timerProgressBar: true,
-        didOpen: () => {
-          Swal.showLoading();
-          const b = Swal.getHtmlContainer().querySelector('strong');
-          timerInterval = setInterval(() => {
-            b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0);
-          }, 100);
-        },
-        willClose: () => {
-          clearInterval(timerInterval);
-        },
-      }).then(result => {
-        if (result.dismiss === Swal.DismissReason.timer) {
-          console.log(message);
-          !!message && Router.push('/game-time');
-        }
-      });
+    socket.on('room:start-done', gameElement => {
+      dispatch(setCurrentGame(gameElement));
     });
 
     socket.on('room:leave-done', roomDetails => {
@@ -84,6 +64,42 @@ const Waiting = () => {
       dispatch(setUser({ ...user, isHost: true }));
     });
   }, []);
+
+  useEffect(() => {
+    if (opponent.name) {
+      socket.on('room:starting-done', message => {
+        let timerInterval;
+        Swal.fire({
+          allowOutsideClick: false,
+          title: 'GAME STARTED!',
+          html: 'Game will start in <strong></strong> seconds. <br></br>',
+          timer: 5300,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+
+            if (user.isHost) {
+              console.log(userName, opponent.name);
+              socket.emit('room:start', userName, opponentName);
+            }
+
+            const b = Swal.getHtmlContainer().querySelector('strong');
+            timerInterval = setInterval(() => {
+              b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0);
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        }).then(result => {
+          if (result.dismiss === Swal.DismissReason.timer) {
+            console.log(message);
+            !!message && Router.push('/game-time');
+          }
+        });
+      });
+    }
+  }, [opponent.name]);
 
   useEffect(() => {
     if (user.isHost && isPlayerLeft)
@@ -208,7 +224,7 @@ const Waiting = () => {
                       <img
                         src={
                           Object.keys(opponent).length === 0
-                            ? '/img/default.png'
+                            ? '/img/anno.png'
                             : opponentAvatar[0]?.img_src
                         }
                         alt="Pacman avatar"
@@ -241,10 +257,15 @@ const Waiting = () => {
                     How to play this game
                   </ModalHeader>
                   <ModalBody>
-                    One day, there is a man whos a chad, namely Pond, and he
-                    stole the most prestiegeous diamond in the world from the
-                    most famous shop keeper name Poraor. Try your best to escape
-                    or catch the chad!!!
+                    One day, there is a man whos a prisoner, and he stole the
+                    most prestiegeous diamond in the world from the most famous
+                    shop keeper or warder. To win the game try your best to
+                    escape or catch the chad!!!
+                    <br />
+                    <br /> - Recieve the role of either warder or
+                    <br /> &nbsp;&nbsp;prisoner at the top-left of the page
+                    <br /> - Warder will start first
+                    <br /> - 10 seconds each round to walk
                     <Card>
                       <img src="/img/gigachad.jpeg" alt="gigachad"></img>
                     </Card>
