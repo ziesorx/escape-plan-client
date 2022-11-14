@@ -1,64 +1,100 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
-import { WrappedBuildError } from 'next/dist/server/base-server';
-import { Router } from 'next/router';
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Card, Row, Col, Container } from 'reactstrap';
-import Swal from 'sweetalert2';
-import Header from '../components/Header';
-import { socket } from '../services/socket';
+import Router from 'next/router'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Card, Row, Col, Container } from 'reactstrap'
+import Swal from 'sweetalert2'
+import Header from '../components/Header'
+import { socket } from '../services/socket'
 import {
   clearCurrentPlayer,
   clearCurrentRoom,
-} from '../store/features/roomSlice';
+} from '../store/features/roomSlice'
 import {
   clearOpponent,
   setOpponent,
   setUser,
-} from '../store/features/userSlice';
+} from '../store/features/userSlice'
 
 const GamePage = () => {
-  const { user } = useSelector(state => state.user);
-  const { opponent } = useSelector(state => state.user);
-  const { currentRoom } = useSelector(state => state.room);
-  const [isHost, setIsHost] = useState(false);
-  const [isWarder, setIsWarder] = useState(false);
-  const [isWarderTurn, setIsWarderTurn] = useState(true);
-  const [isHover, setIsHover] = useState(false);
-  const [alreadyWalk, setAlreadyWalk] = useState(false);
-  const [matrix, setMatrix] = useState(null);
-  const [timer, setTimer] = useState(10);
-  const [goingCoor, setGoingCoor] = useState(null);
+  const { user } = useSelector((state) => state.user)
+  const { opponent } = useSelector((state) => state.user)
+  const { currentRoom } = useSelector((state) => state.room)
+  const [isHost, setIsHost] = useState(false)
+  const [isWarder, setIsWarder] = useState(false)
+  const [isWarderTurn, setIsWarderTurn] = useState(true)
+  const [isHover, setIsHover] = useState(false)
+  const [alreadyWalk, setAlreadyWalk] = useState(false)
+  const [matrix, setMatrix] = useState(null)
+  const [timer, setTimer] = useState(10)
+  const [goingCoor, setGoingCoor] = useState(null)
+
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    user.name === currentRoom?.users.filter(user => !!user.isHost)[0].name &&
-      setIsHost(true);
+    user.name === currentRoom.users.filter((user) => !!user.isHost)[0].name &&
+      setIsHost(true)
 
-    socket.on('room:start-done', gameElement => {
-      console.log(gameElement);
-      setMatrix(gameElement.mapDetail.map);
+    socket.on('room:start-done', (gameElement) => {
+      console.log(gameElement)
+      setMatrix(gameElement.mapDetail.map)
       const myUser = gameElement.users.filter(
-        currentUser => currentUser.name === user.name
-      )[0];
-      setIsWarder(myUser.isWarder);
-    });
+        (currentUser) => currentUser.name === user.name
+      )[0]
+      setIsWarder(myUser.isWarder)
+    })
 
-    socket.on('game:update-done', newCoor => {
-      console.log(newCoor);
-      setMatrix(newCoor.mapDetail.map);
-      setAlreadyWalk(false);
-      setIsWarderTurn(newCoor.isWarderTurn);
-    });
+    socket.on('room:play-again-done', (gameElement) => {
+      let timerInterval
+      Swal.fire({
+        allowOutsideClick: false,
+        title: 'NEW GAME IS STARTING!',
+        html: 'Game will start in <strong></strong> seconds. <br></br>',
+        timer: 5300,
+        timerProgressBar: true,
+        didOpen: () => {
+          Swal.showLoading()
+          const b = Swal.getHtmlContainer().querySelector('strong')
+          timerInterval = setInterval(() => {
+            b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0)
+          }, 100)
+        },
+        willClose: () => {
+          clearInterval(timerInterval)
+        },
+      }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+          console.log(gameElement)
+          setMatrix(gameElement.mapDetail.map)
+          const myUser = gameElement.users.filter(
+            (currentUser) => currentUser.name === user.name
+          )[0]
+          setAlreadyWalk(false)
+          setIsWarder(myUser.isWarder)
+          setGoingCoor(null)
+          setIsWarderTurn(true)
+          setTimer(10)
+        }
+      })
+    })
+
+    socket.on('game:update-done', (newCoor) => {
+      console.log(newCoor)
+      setMatrix(newCoor.mapDetail.map)
+      setAlreadyWalk(false)
+      setIsWarderTurn(newCoor.isWarderTurn)
+    })
 
     socket.on('game:end-done', (gameElement, winnerUserInfo) => {
-      setTimer(-1);
-      const myUser = gameElement.users.filter(
-        currentUser => currentUser.name === user.name
-      )[0];
+      setTimer(-1)
+      console.log(winnerUserInfo)
       const winUser = gameElement.users.filter(
-        user => user.name === winnerUserInfo.name
-      )[0];
+        (user) => user.name === winnerUserInfo.name
+      )[0]
+
+      if (winnerUserInfo.name === user.name) dispatch(setUser(winnerUserInfo))
+      else dispatch(setOpponent(winnerUserInfo))
 
       if (user.isHost)
         Swal.fire({
@@ -70,19 +106,17 @@ const GamePage = () => {
           confirmButtonText: 'Play again?',
           denyButtonText: `Leave room`,
           allowOutsideClick: false,
-        }).then(result => {
-          if (winnerUserInfo.name === user.name) setUser(winnerUserInfo);
-          else setOpponent(winnerUserInfo);
-
+        }).then((result) => {
           if (result.isConfirmed) {
-            Swal.fire('kuay wai gorn');
+            socket.emit('room:play-again', winnerUserInfo.name)
           } else if (result.isDenied) {
-            dispatch(clearCurrentRoom());
-            dispatch(clearCurrentPlayer());
-            dispatch(clearOpponent());
-            Router.push('main-menu');
+            dispatch(clearCurrentRoom())
+            dispatch(clearCurrentPlayer())
+            dispatch(clearOpponent())
+            socket.emit('room:leave')
+            Router.push('main-menu')
           }
-        });
+        })
       else
         Swal.fire({
           title: `${winnerUserInfo.name} (${
@@ -93,62 +127,67 @@ const GamePage = () => {
           showConfirmButton: false,
           denyButtonText: `Leave room`,
           allowOutsideClick: false,
-        }).then(result => {
-          if (winnerUserInfo.name === user.name) setUser(winnerUserInfo);
-          else setOpponent(winnerUserInfo);
-
-          if (result.isConfirmed) {
-            // socket.emit('game:play-again')
-            Swal.fire('kuay wai gorn');
-          } else if (result.isDenied) {
-            dispatch(clearCurrentRoom());
-            dispatch(clearCurrentPlayer());
-            dispatch(clearOpponent());
-            Router.push('main-menu');
+        }).then((result) => {
+          if (result.isDenied) {
+            dispatch(clearCurrentRoom())
+            dispatch(clearCurrentPlayer())
+            dispatch(clearOpponent())
+            Router.push('main-menu')
           }
-        });
-    });
-  }, []);
+        })
+    })
+    socket.on('room:leave-done', (roomDetails) => {
+      if (roomDetails.users.length != 2)
+        Swal.fire({
+          icon: 'warning',
+          title: 'Other player has left',
+          showConfirmButton: false,
+          timer: 1500,
+        })
+      Router.push('main-menu')
+    })
+  }, [])
 
   useEffect(() => {
-    if (isHost) socket.emit('room:start', user.name, opponent.name);
-  }, [isHost]);
+    if (isHost) socket.emit('room:start', user.name, opponent.name)
+  }, [isHost])
 
   useEffect(() => {
-    if (timer === -1) return;
+    if (timer === -1) return
 
-    let timeout;
+    let timeout
 
-    if (timer > 0) timeout = setTimeout(() => setTimer(prev => prev - 1), 1000);
+    if (timer > 0)
+      timeout = setTimeout(() => setTimer((prev) => prev - 1), 1000)
 
     if (timer === 0) {
       if (isWarder === isWarderTurn) {
-        console.log(goingCoor);
-        socket.emit('game:update', goingCoor, isWarderTurn);
+        console.log(goingCoor)
+        socket.emit('game:update', goingCoor, isWarderTurn)
       }
     }
 
-    return () => clearTimeout(timeout);
-  }, [timer]);
+    return () => clearTimeout(timeout)
+  }, [timer])
 
   useEffect(() => {
-    setTimer(10);
-  }, [isWarderTurn]);
+    setTimer(10)
+  }, [isWarderTurn])
 
   const findPos = (array, symbol) => {
-    const string = array.toString().replace(/,/g, '');
-    const pos = string.indexOf(symbol);
+    const string = array.toString().replace(/,/g, '')
+    const pos = string.indexOf(symbol)
 
-    const d = (array[0] || []).length;
+    const d = (array[0] || []).length
 
-    const x = pos % d;
-    const y = Math.floor(pos / d);
+    const x = pos % d
+    const y = Math.floor(pos / d)
 
-    return { y, x };
-  };
+    return { y, x }
+  }
 
-  const highlightTile = coord => {
-    const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p');
+  const highlightTile = (coord) => {
+    const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p')
 
     if (isWarder === isWarderTurn && !alreadyWalk && isHover) {
       if (
@@ -163,22 +202,22 @@ const GamePage = () => {
           coord.y === findPos(matrix, 'w').y &&
           coord.x === findPos(matrix, 'w').x
         )
-          return 'danger-highlighted';
+          return 'danger-highlighted'
         else if (
           isWarder &&
           coord.y === findPos(matrix, 'p').y &&
           coord.x === findPos(matrix, 'p').x
         )
-          return 'success-highlighted';
+          return 'success-highlighted'
 
-        return 'highlighted';
+        return 'highlighted'
       } else {
-        return '';
+        return ''
       }
     }
-  };
+  }
 
-  const renderCharacter = character => {
+  const renderCharacter = (character) => {
     if (character === 'w') {
       return (
         <>
@@ -191,7 +230,7 @@ const GamePage = () => {
             onMouseLeave={() => setIsHover(false)}
           />
         </>
-      );
+      )
     } else if (character === 'p') {
       return (
         <>
@@ -204,7 +243,7 @@ const GamePage = () => {
             onMouseLeave={() => setIsHover(false)}
           />
         </>
-      );
+      )
     } else if (character === 1) {
       return (
         <>
@@ -215,7 +254,7 @@ const GamePage = () => {
             style={{ height: '100%', objectFit: 'cover' }}
           />
         </>
-      );
+      )
     } else if (character === 'h') {
       return (
         <>
@@ -226,27 +265,27 @@ const GamePage = () => {
             style={{ height: '100%', objectFit: 'cover' }}
           />
         </>
-      );
+      )
     }
 
-    return <div className="free-space-tile"></div>;
-  };
+    return <div className="free-space-tile"></div>
+  }
 
   const updateCurrentBoard = (rowIdx, columnIdx) => {
-    const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p');
+    const charCoor = isWarder ? findPos(matrix, 'w') : findPos(matrix, 'p')
 
     if (
       !isWarder &&
       rowIdx === findPos(matrix, 'w').y &&
       columnIdx === findPos(matrix, 'w').x
     ) {
-      return;
+      return
     } else if (
       isWarder &&
       rowIdx === findPos(matrix, 'h').y &&
       columnIdx === findPos(matrix, 'h').x
     ) {
-      return;
+      return
     }
 
     if (
@@ -256,38 +295,38 @@ const GamePage = () => {
         !(rowIdx === charCoor.y && columnIdx === charCoor.x + 1) &&
         !(rowIdx === charCoor.y && columnIdx === charCoor.x - 1))
     )
-      return;
+      return
 
-    setGoingCoor([rowIdx, columnIdx]);
-    setAlreadyWalk(true);
+    setGoingCoor([rowIdx, columnIdx])
+    setAlreadyWalk(true)
 
-    setMatrix(prevBoard => {
-      const newBoard = [...prevBoard];
+    setMatrix((prevBoard) => {
+      const newBoard = [...prevBoard]
 
       if (
         isWarder &&
         rowIdx === findPos(matrix, 'p').y &&
         columnIdx === findPos(matrix, 'p').x
       ) {
-        socket.emit('game:end');
+        socket.emit('game:end')
       } else if (
         !isWarder &&
         rowIdx === findPos(matrix, 'h').y &&
         columnIdx === findPos(matrix, 'h').x
       ) {
-        socket.emit('game:end');
-        return;
+        socket.emit('game:end')
+        return
       }
 
-      newBoard[charCoor.y] = [...newBoard[charCoor.y]];
-      newBoard[charCoor.y][charCoor.x] = 0;
-      newBoard[rowIdx][columnIdx] = isWarder ? 'w' : 'p';
+      newBoard[charCoor.y] = [...newBoard[charCoor.y]]
+      newBoard[charCoor.y][charCoor.x] = 0
+      newBoard[rowIdx][columnIdx] = isWarder ? 'w' : 'p'
 
-      return newBoard;
-    });
-  };
+      return newBoard
+    })
+  }
 
-  if (!matrix) return;
+  if (!matrix) return
 
   return (
     <Container className="mt--6" fluid>
@@ -331,16 +370,16 @@ const GamePage = () => {
                             )}`}
                             onClick={() => {
                               if (isWarder === isWarderTurn && !alreadyWalk) {
-                                updateCurrentBoard(rowIdx, columnIdx);
+                                updateCurrentBoard(rowIdx, columnIdx)
                               }
                             }}
                           >
                             {renderCharacter(column)}
                           </Col>
-                        );
+                        )
                       })}
                     </Row>
-                  );
+                  )
                 })}
               </Col>
             </Row>
@@ -348,7 +387,7 @@ const GamePage = () => {
         </Col>
       </Row>
     </Container>
-  );
-};
+  )
+}
 
-export default GamePage;
+export default GamePage
