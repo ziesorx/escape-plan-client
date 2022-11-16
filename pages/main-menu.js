@@ -53,6 +53,10 @@ const LandingPage = () => {
         dispatch(setOpponent(roomDetails.users[0]));
       }
     });
+
+    socket.on('room:all-done', rooms => {
+      console.log(rooms);
+    });
   }, []);
 
   const onCreateClick = () => {
@@ -63,12 +67,51 @@ const LandingPage = () => {
     Router.push('/waiting-room');
   };
 
+  const renderJoin = () => {
+    return (
+      <>
+        <Input
+          className="mt-4"
+          bsSize="lg"
+          placeholder="Enter room id..."
+          onChange={e => setRoomId(e.target.value)}
+          value={roomId}
+        />
+
+        <Button
+          block
+          className="mt-3 btn-light"
+          onClick={onJoinClick}
+          disabled={disJoinButton}
+          size="lg"
+        >
+          {disJoinButton ? renderSpinner() : 'Join Room'}
+        </Button>
+      </>
+    );
+  };
+
+  const renderButton = () => {
+    return (
+      <>
+        <Button
+          block
+          className="mt-4 btn-light"
+          onClick={() => setJoinRoom(true)}
+          size="lg"
+        >
+          Join Room
+        </Button>
+      </>
+    );
+  };
+
   const onJoinClick = () => {
     setDisJoinButton(true);
 
     Swal.fire({
       title: 'Joining Room',
-      timer: 1500,
+      timer: 1000,
       timerProgressBar: true,
       didOpen: () => {
         Swal.showLoading();
@@ -92,17 +135,8 @@ const LandingPage = () => {
           setDisJoinButton(false);
         });
       } else {
-        Swal.fire({
-          title: `Welcome ${name}!`,
-          text: `Joined room ${roomId}`,
-          icon: 'success',
-          showConfirmButton: false,
-          timer: 1500,
-        }).then(result => {
-          setDisJoinButton(false);
-          setRoomId(roomId);
-        });
-        socket.emit('room:join', roomId);
+        setDisJoinButton(false);
+        setRoomId(roomId);
         Router.push('/waiting-room');
       }
     });
@@ -115,73 +149,61 @@ const LandingPage = () => {
   return (
     <>
       <Container className="mt--6 pb-5" fluid>
-        <Row className="justify-content-center mx-auto">
-          <Col md="5">
-            <Card className="main-card">
-              <CardBody className="p-0 d-flex flex-column justify-content-center">
-                <Row className="m-0 align-items-center h-100">
-                  <Col className="text-center">
-                    <Row className="flex-column">
-                      <Col className="display-6 mb-3">Hi there!</Col>
-                      <Col className="h5">
-                        Create Room now to
-                        <br />
-                        play with friend!
-                      </Col>
-
-                      <Col className="px-lg-5">
-                        <Button
-                          block
-                          className="mt-4 btn-create"
-                          onClick={onCreateClick}
-                          disabled={disCreateButton}
-                          size="lg"
-                        >
-                          {disCreateButton ? renderSpinner() : 'Create Room'}
-                        </Button>
-                      </Col>
-                    </Row>
+        <Card className="main-card">
+          <CardBody className="p-0 d-flex flex-column justify-content-center">
+            <Row className="m-0 align-items-center h-100">
+              <Col className="text-center">
+                <Row className="flex-column">
+                  <Col className="display-6 mb-3">Hi there!</Col>
+                  <Col className="h5">
+                    Create Room now to
+                    <br />
+                    play with friend!
                   </Col>
 
-                  <Col className="text-center overlay h-100 d-flex justify-content-center flex-column">
-                    <Row className="flex-column">
-                      <Col className="display-6 mb-3">
-                        Already
-                        <br />
-                        have room?
-                      </Col>
-                      <Col className="h5">
-                        Join Room and
-                        <br />
-                        enjoy with friend!
-                      </Col>
-
-                      <Col className="px-lg-5">
-                        <Input
-                          className="mt-4"
-                          bsSize="lg"
-                          placeholder="Enter room id..."
-                          onChange={e => setRoomId(e.target.value)}
-                          value={roomId}
-                        />
-
-                        <Button
-                          block
-                          className="mt-3 btn-light"
-                          onClick={onJoinClick}
-                          disabled={disJoinButton}
-                          size="lg"
-                        >
-                          {disJoinButton ? renderSpinner() : 'Join Room'}
-                        </Button>
-                      </Col>
-                    </Row>
+                  <Col className="px-lg-5">
+                    <Button
+                      block
+                      className="mt-4 btn-create"
+                      onClick={onCreateClick}
+                      disabled={disCreateButton}
+                      size="lg"
+                    >
+                      {disCreateButton ? renderSpinner() : 'Create Room'}
+                    </Button>
                   </Col>
                 </Row>
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
+              </Col>
+
+              <Col className="text-center overlay h-100 d-flex justify-content-center flex-column">
+                <Row className="flex-column">
+                  <Col className="display-6 mb-3">Find room</Col>
+                  <Col className="h5">
+                    Join Room and
+                    <br />
+                    enjoy with friend!
+                  </Col>
+
+                  <Col className="px-lg-5">
+                    {joinRoom ? renderJoin() : renderButton()}
+                    <Button
+                      block
+                      className="mt-3 btn-dark"
+                      onClick={() => {
+                        socket.emit('room:all');
+                      }}
+                      disabled={disCreateButton}
+                      size="lg"
+                    >
+                      Browse Room
+                      {/* {disCreateButton ? renderSpinner() : 'Create Room'} */}
+                    </Button>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
+          </CardBody>
+        </Card>
       </Container>
     </>
   );

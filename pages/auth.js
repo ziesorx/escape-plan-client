@@ -18,6 +18,7 @@ import { useDispatch } from 'react-redux';
 import { avatars } from '../variables/avatars';
 import { setOpponent, setUser } from '../store/features/userSlice';
 import Router from 'next/router';
+import Swal from 'sweetalert2';
 
 const Auth = () => {
   const [name, setName] = useState('');
@@ -62,6 +63,26 @@ const Auth = () => {
   const onLoginClick = () => {
     setDisButton(true);
 
+    if (!name) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please fill your name!',
+      });
+      setDisButton(false);
+      return;
+    }
+
+    if (!selectedAvatarId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please select an avatar!',
+      });
+      setDisButton(false);
+      return;
+    }
+
     socket.emit('user:login', name, selectedAvatarId);
   };
 
@@ -69,7 +90,7 @@ const Auth = () => {
     <>
       <Container className="mt--6 pb-5" fluid>
         <Row className="justify-content-center mx-auto">
-          <Col md="5">
+          <Col md="8">
             <Card className="main-card">
               <CardBody className="px-lg-5 py-lg-5">
                 <div className="text-center mb-5">

@@ -151,136 +151,122 @@ const Waiting = () => {
   };
 
   return (
-    <Container className="px-0">
-      <Row className="justify-content-center">
-        <Col md="10">
-          <Card
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.8)',
-              border: '3px solid white',
-              // width: '80%',
-            }}
-          >
-            <Row className="justify-content-center" style={{ gap: '2rem' }}>
-              <Row>
-                <div>
-                  <Button
-                    className="mt-2 mx-2 btn-create position-absolute top-0 start-0"
-                    onClick={backToIndex}
-                  >
-                    Back
-                  </Button>
-                  <Row className="justify-content-center">
-                    <Col md="4">
-                      <CardBody className="text-center fs-1">
-                        <span className="fs-3">Room ID</span>
-                        <br />
-                        <span className="display-3">
-                          {currentRoom === null ? '????' : currentRoom.id}
-                        </span>
-                      </CardBody>
-                    </Col>
-                  </Row>
-                </div>
-              </Row>
+    <Container className="h-100 d-flex justify-content-center" fluid>
+      <Card className="waiting-card">
+        <Row className="justify-content-center" style={{ gap: '1rem' }}>
+          <Row>
+            <div>
+              <Button
+                className="mt-2 mx-2 btn-create position-absolute top-0 start-0"
+                onClick={backToIndex}
+              >
+                Back
+              </Button>
               <Row className="justify-content-center">
-                <Col md="4">
-                  <Card className="text-md-center fs-2">
-                    <Row>
-                      <span>
-                        {Object.keys(user).length === 0 ? '???' : userName}
-                      </span>
-                    </Row>
-                    <Row>
-                      <img
-                        src={
-                          Object.keys(user).length === 0
-                            ? '/img/default.png'
-                            : userAvatar[0]?.img_src
-                        }
-                        alt="Pacman avatar"
-                      />
-                    </Row>
-                  </Card>
-                </Col>
-                <Col md="4">
-                  <img
-                    src="/img/vs-logo.png"
-                    className="img-fluid"
-                    alt="versus logo"
-                  ></img>
-                </Col>
-                <Col md="4">
-                  <Card className="text-md-center fs-2">
-                    <Row>
-                      <span>
-                        {Object.keys(opponent).length === 0
-                          ? '???'
-                          : opponentName}
-                      </span>
-                      <span></span>
-                    </Row>
-                    <Row>
-                      <img
-                        src={
-                          Object.keys(opponent).length === 0
-                            ? '/img/anno.png'
-                            : opponentAvatar[0]?.img_src
-                        }
-                        alt="Pacman avatar"
-                      />
-                    </Row>
-                  </Card>
-                </Col>
-              </Row>
-              <Row className="justify-content-center">
-                <Col md="3" className="text-center">
-                  {user.isHost && renderButton()}
-                </Col>
-              </Row>
-              <Row>
-                <Col md="4" className="align-vertical-center">
-                  <FontAwesomeIcon icon={faUser} size="2x" className="" />
-                  &nbsp;<span className="fs-1">{currentPlayer}</span>
-                </Col>
-                <Col md="4"></Col>
-                <Col md="4">
-                  <Button
-                    className="mb-2 mx-2 btn-create position-absolute bottom-0 end-0"
-                    onClick={toggle}
-                  >
-                    ?
-                  </Button>
-                </Col>
-                <Modal isOpen={modal} toggle={toggle}>
-                  <ModalHeader toggle={toggle}>
-                    How to play this game
-                  </ModalHeader>
-                  <ModalBody>
-                    One day, there is a man whos a prisoner, and he stole the
-                    most prestiegeous diamond in the world from the most famous
-                    shop keeper or warder. To win the game try your best to
-                    escape or catch the chad!!!
+                <Col md="8">
+                  <CardBody className="text-center fs-1">
+                    <span className="fs-3">Room ID</span>
                     <br />
-                    <br /> - Recieve the role of either warder or
-                    <br /> &nbsp;&nbsp;prisoner at the top-left of the page
-                    <br /> - Warder will start first
-                    <br /> - 10 seconds each round to walk
-                    <Card>
-                      <img src="/img/gigachad.jpeg" alt="gigachad"></img>
-                    </Card>
-                  </ModalBody>
-                  <ModalFooter>
-                    <Button color="dark" onClick={toggle}>
-                      Close
-                    </Button>{' '}
-                  </ModalFooter>
-                </Modal>
+                    <span className="display-3">
+                      {currentRoom === null ? '????' : currentRoom.id}
+                    </span>
+                  </CardBody>
+                </Col>
               </Row>
-            </Row>
-          </Card>
-        </Col>
-      </Row>
+            </div>
+          </Row>
+          <Row className="justify-content-center" style={{ gap: '0' }}>
+            <Col md="4">
+              <Card className="text-md-center fs-2">
+                <Row>
+                  <span>
+                    {Object.keys(user).length === 0 ? '???' : userName}
+                  </span>
+                </Row>
+                <Row>
+                  <img
+                    src={
+                      Object.keys(user).length === 0
+                        ? '/img/default.png'
+                        : userAvatar[0]?.img_src
+                    }
+                    alt="Pacman avatar"
+                  />
+                </Row>
+              </Card>
+            </Col>
+            <Col md="4">
+              <img
+                src="/img/vs-logo.png"
+                className="img-fluid"
+                alt="versus logo"
+              ></img>
+            </Col>
+            <Col md="4">
+              <Card className="text-md-center fs-2">
+                <Row>
+                  <span>
+                    {Object.keys(opponent).length === 0 ? '???' : opponentName}
+                  </span>
+                  <span></span>
+                </Row>
+                <Row>
+                  <img
+                    src={
+                      Object.keys(opponent).length === 0
+                        ? '/img/anno.png'
+                        : opponentAvatar[0]?.img_src
+                    }
+                    alt="Pacman avatar"
+                  />
+                </Row>
+              </Card>
+            </Col>
+          </Row>
+          <Row className="justify-content-center">
+            <Col md="3" className="text-center">
+              {user.isHost && renderButton()}
+            </Col>
+          </Row>
+          <Row>
+            <Col md="4" className="align-vertical-center">
+              <FontAwesomeIcon icon={faUser} size="2x" className="" />
+              &nbsp;<span className="fs-1">{currentPlayer}</span>
+            </Col>
+            <Col md="4"></Col>
+            <Col md="4">
+              <Button
+                className="mb-2 mx-2 btn-create position-absolute bottom-0 end-0"
+                onClick={toggle}
+              >
+                ?
+              </Button>
+            </Col>
+            <Modal isOpen={modal} toggle={toggle}>
+              <ModalHeader toggle={toggle}>How to play this game</ModalHeader>
+              <ModalBody>
+                One day, there is a man whos a prisoner, and he stole the most
+                prestiegeous diamond in the world from the most famous shop
+                keeper or warder. To win the game try your best to escape or
+                catch the chad!!!
+                <br />
+                <br /> - Recieve the role of either warder or
+                <br /> &nbsp;&nbsp;prisoner at the top-left of the page
+                <br /> - Warder will start first
+                <br /> - 10 seconds each round to walk
+                <Card>
+                  <img src="/img/gigachad.jpeg" alt="gigachad"></img>
+                </Card>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="dark" onClick={toggle}>
+                  Close
+                </Button>{' '}
+              </ModalFooter>
+            </Modal>
+          </Row>
+        </Row>
+      </Card>
     </Container>
   );
 };
