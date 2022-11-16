@@ -125,6 +125,19 @@ FOR TEST
   background-color: lightyellow;
   z-index: 1;
 }
+
+.talk-bubble-left {
+  margin: 40px;
+  display: inline-block;
+  position: absolute;
+  left: 20px;
+  top: -80px;
+  width: 200px;
+  height: auto;
+  background-color: lightyellow;
+  z-index: 1;
+}
+
 .border {
   border: 8px solid #666;
 }
