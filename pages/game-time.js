@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import Router from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Card, Row, Col, Container } from 'reactstrap';
 import Swal from 'sweetalert2';
@@ -28,7 +28,9 @@ const GamePage = () => {
   const [matrix, setMatrix] = useState(null);
   const [timer, setTimer] = useState(10);
   const [goingCoor, setGoingCoor] = useState(null);
-
+  const [message, setMessage] = useState('');
+  const [chatMessage, setChatMessage] = useState('');
+  const [display, setDisplay] = useState(false);
   const dispatch = useDispatch();
 
   const setWarder = gameElement => {
@@ -155,6 +157,30 @@ const GamePage = () => {
   useEffect(() => {
     setTimer(10);
   }, [isWarderTurn]);
+
+  useEffect(() => {
+    let isCancelled = false;
+    const messageChange = async () => {
+      setTimeout(() => {
+        if (!isCancelled) {
+          socket.on('game:chat-done', (message, userInfo) => {
+            console.log(message);
+            setTimeout(() => {
+              setDisplay(true);
+            }, 500);
+            setTimeout(() => {
+              setDisplay(false);
+            }, 3000);
+            setChatMessage(message);
+          });
+        }
+      }, 1000);
+    };
+    messageChange();
+    return () => {
+      isCancelled = true;
+    };
+  }, [message]);
 
   const findPos = (array, symbol) => {
     const string = array.toString().replace(/,/g, '');
@@ -307,12 +333,27 @@ const GamePage = () => {
     });
   };
 
+  const sendMsg = () => {
+    socket.emit('game:chat', message);
+    console.log(message);
+    setMessage('');
+  };
+
   if (!matrix) return;
 
   return (
     <Container className="mt--6" fluid>
       <Row className="justify-content-center mx-auto">
         <Col className="position-relative" md="10">
+          <Col
+            id="chatBox"
+            className="text-end"
+            style={{ display: display ? 'block' : 'none' }}
+          >
+            <div class="talk-bubble-right tri-right round btm-right-in">
+              <div class="talktext">{chatMessage}</div>
+            </div>
+          </Col>
           <Card
             style={{
               backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -330,7 +371,6 @@ const GamePage = () => {
               timer={timer}
               isWarderTurn={isWarderTurn}
             />
-
             <Row className="justify-content-center mx-auto">
               <Col
                 md="5"
@@ -362,6 +402,26 @@ const GamePage = () => {
                     </Row>
                   );
                 })}
+              </Col>
+            </Row>
+            <Row className="justify-content-center">
+              <Col className="text-center">
+                <input
+                  className="mt-4"
+                  bsSize="lg"
+                  placeholder="Enter the text..."
+                  onChange={e => setMessage(e.target.value)}
+                  value={message}
+                />
+                <button
+                  class="btn btn-outline-secondary"
+                  onClick={sendMsg}
+                  type="button"
+                  id="button-addon2"
+                  disabled={message === '' ? true : false}
+                >
+                  SEND
+                </button>
               </Col>
             </Row>
           </Card>
