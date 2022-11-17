@@ -160,6 +160,10 @@ const LandingPage = () => {
   };
 
   const renderRooms = allRooms => {
+    if (allRooms.length === 0) {
+      return <ListGroupItem>There is no room in the server</ListGroupItem>;
+    }
+
     return allRooms.slice(0, 10).map(room => (
       <ListGroupItem key={room.id}>
         <div className="d-flex">

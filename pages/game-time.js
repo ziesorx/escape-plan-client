@@ -45,6 +45,9 @@ const GamePage = () => {
       currentUser => currentUser.name === user.name
     )[0];
     setIsWarder(myUser.isWarder);
+
+    if (myUser.isWarder) setGoingCoor(gameElement.mapDetail.wCoor);
+    else setGoingCoor(gameElement.mapDetail.pCoor);
   };
 
   useEffect(() => {
@@ -86,7 +89,6 @@ const GamePage = () => {
     });
 
     socket.on('game:update-done', newCoor => {
-      console.log(newCoor);
       setMatrix(newCoor.mapDetail.map);
       setAlreadyWalk(false);
       setIsWarderTurn(newCoor.isWarderTurn);
@@ -94,25 +96,23 @@ const GamePage = () => {
 
     socket.on('game:end-done', (gameElement, winnerUserInfo) => {
       setTimer(-1);
-      console.log(winnerUserInfo);
       const winUser = gameElement.users.filter(
         user => user.name === winnerUserInfo.name
       )[0];
 
-      const { hCoor, wCoor, pCoor } = gameElement.mapDetail;
-      // if (winUser.isWarder) {
-      //   const newBoard = [...matrix];
-      //   newBoard[wCoor[0]][wCoor[1]] = 0;
-      //   newBoard[pCoor[0]][pCoor[1]] = 'w';
+      const { hCoor, wCoor, pCoor, map } = gameElement.mapDetail;
+      const newBoard = JSON.parse(JSON.stringify(map));
+      if (winUser.isWarder) {
+        newBoard[wCoor[0]][wCoor[1]] = 0;
+        newBoard[pCoor[0]][pCoor[1]] = 'w';
 
-      //   console.log(newBoard);
-      // } else {
-      //   const newBoard = [...matrix];
-      //   newBoard[pCoor[0]][pCoor[1]] = 0;
-      //   newBoard[hCoor[0]][hCoor[1]] = 'p';
+        setMatrix(newBoard);
+      } else {
+        newBoard[pCoor[0]][pCoor[1]] = 0;
+        newBoard[hCoor[0]][hCoor[1]] = 'p';
 
-      //   console.log(newBoard);
-      // }
+        setMatrix(newBoard);
+      }
 
       if (winnerUserInfo.name === user.name) dispatch(setUser(winnerUserInfo));
       else dispatch(setOpponent(winnerUserInfo));
@@ -162,7 +162,6 @@ const GamePage = () => {
     socket.on('room:leave-done', roomDetails => {
       dispatch(setCurrentPlayer(roomDetails.users.length));
       dispatch(clearOpponent());
-      console.log(roomDetails);
       dispatch(setUser({ ...user, isHost: true }));
     });
   }, []);
@@ -176,7 +175,6 @@ const GamePage = () => {
 
     if (timer === 0) {
       if (isWarder === isWarderTurn) {
-        console.log(goingCoor);
         socket.emit('game:update', goingCoor, isWarderTurn);
       }
     }
@@ -245,13 +243,7 @@ const GamePage = () => {
           }, 100);
         },
       }).then(result => {
-        if (result.isDenied) {
-          dispatch(clearCurrentRoom());
-          dispatch(clearCurrentPlayer());
-          dispatch(clearOpponent());
-          socket.emit('room:leave');
-          Router.push('main-menu');
-        } else if (result.dismiss === Swal.DismissReason.timer) {
+        if (result.isDenied || result.dismiss === Swal.DismissReason.timer) {
           dispatch(clearCurrentRoom());
           dispatch(clearCurrentPlayer());
           dispatch(clearOpponent());
@@ -388,7 +380,7 @@ const GamePage = () => {
     setGoingCoor([rowIdx, columnIdx]);
     setAlreadyWalk(true);
 
-    const newBoard = [...matrix];
+    const newBoard = JSON.parse(JSON.stringify(matrix));
 
     if (
       isWarder &&
@@ -408,7 +400,6 @@ const GamePage = () => {
       return;
     }
 
-    newBoard[charCoor.y] = [...newBoard[charCoor.y]];
     newBoard[charCoor.y][charCoor.x] = 0;
     newBoard[rowIdx][columnIdx] = isWarder ? 'w' : 'p';
 
