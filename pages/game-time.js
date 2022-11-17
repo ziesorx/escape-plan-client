@@ -10,6 +10,7 @@ import { socket } from '../services/socket';
 import {
   clearCurrentPlayer,
   clearCurrentRoom,
+  setCurrentPlayer,
 } from '../store/features/roomSlice';
 import {
   clearOpponent,
@@ -21,6 +22,7 @@ const GamePage = () => {
   const { user } = useSelector(state => state.user);
   const { opponent } = useSelector(state => state.user);
   const { currentGame } = useSelector(state => state.room);
+  const { currentPlayer } = useSelector(state => state.room);
   const [isWarder, setIsWarder] = useState(false);
   const [isWarderTurn, setIsWarderTurn] = useState(true);
   const [isHover, setIsHover] = useState(false);
@@ -93,6 +95,21 @@ const GamePage = () => {
         user => user.name === winnerUserInfo.name
       )[0];
 
+      const { hCoor, wCoor, pCoor } = gameElement.mapDetail;
+      // if (winUser.isWarder) {
+      //   const newBoard = [...matrix];
+      //   newBoard[wCoor[0]][wCoor[1]] = 0;
+      //   newBoard[pCoor[0]][pCoor[1]] = 'w';
+
+      //   console.log(newBoard);
+      // } else {
+      //   const newBoard = [...matrix];
+      //   newBoard[pCoor[0]][pCoor[1]] = 0;
+      //   newBoard[hCoor[0]][hCoor[1]] = 'p';
+
+      //   console.log(newBoard);
+      // }
+
       if (winnerUserInfo.name === user.name) dispatch(setUser(winnerUserInfo));
       else dispatch(setOpponent(winnerUserInfo));
 
@@ -113,6 +130,7 @@ const GamePage = () => {
             dispatch(clearCurrentRoom());
             dispatch(clearCurrentPlayer());
             dispatch(clearOpponent());
+            socket.emit('room:leave');
             Router.push('main-menu');
           }
         });
@@ -131,9 +149,17 @@ const GamePage = () => {
             dispatch(clearCurrentRoom());
             dispatch(clearCurrentPlayer());
             dispatch(clearOpponent());
+            socket.emit('room:leave');
             Router.push('main-menu');
           }
         });
+    });
+
+    socket.on('room:leave-done', roomDetails => {
+      dispatch(setCurrentPlayer(roomDetails.users.length));
+      dispatch(clearOpponent());
+      console.log(roomDetails);
+      dispatch(setUser({ ...user, isHost: true }));
     });
   }, []);
 
@@ -181,6 +207,44 @@ const GamePage = () => {
       isCancelled = true;
     };
   }, [message]);
+
+  useEffect(() => {
+    if (currentPlayer === 1) {
+      let timerInterval;
+      Swal.fire({
+        title: `Other player has left the room!`,
+        html: 'Leaving the room in <strong></strong> seconds.',
+        timer: 5300,
+        timerProgressBar: true,
+        showDenyButton: true,
+        showConfirmButton: false,
+        denyButtonText: `Leave room`,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+
+          const b = Swal.getHtmlContainer().querySelector('strong');
+          timerInterval = setInterval(() => {
+            b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0);
+          }, 100);
+        },
+      }).then(result => {
+        if (result.isDenied) {
+          dispatch(clearCurrentRoom());
+          dispatch(clearCurrentPlayer());
+          dispatch(clearOpponent());
+          socket.emit('room:leave');
+          Router.push('main-menu');
+        } else if (result.dismiss === Swal.DismissReason.timer) {
+          dispatch(clearCurrentRoom());
+          dispatch(clearCurrentPlayer());
+          dispatch(clearOpponent());
+          socket.emit('room:leave');
+          Router.push('main-menu');
+        }
+      });
+    }
+  }, [currentPlayer]);
 
   const findPos = (array, symbol) => {
     const string = array.toString().replace(/,/g, '');
@@ -308,29 +372,31 @@ const GamePage = () => {
     setGoingCoor([rowIdx, columnIdx]);
     setAlreadyWalk(true);
 
-    setMatrix(prevBoard => {
-      const newBoard = [...prevBoard];
+    const newBoard = [...matrix];
 
-      if (
-        isWarder &&
-        rowIdx === findPos(matrix, 'p').y &&
-        columnIdx === findPos(matrix, 'p').x
-      ) {
-        socket.emit('game:end');
-      } else if (
-        !isWarder &&
-        rowIdx === findPos(matrix, 'h').y &&
-        columnIdx === findPos(matrix, 'h').x
-      ) {
-        socket.emit('game:end');
-      }
+    if (
+      isWarder &&
+      rowIdx === findPos(matrix, 'p').y &&
+      columnIdx === findPos(matrix, 'p').x
+    ) {
+      console.log('You win');
+      socket.emit('game:end');
+      return;
+    } else if (
+      !isWarder &&
+      rowIdx === findPos(matrix, 'h').y &&
+      columnIdx === findPos(matrix, 'h').x
+    ) {
+      console.log('You win');
+      socket.emit('game:end');
+      return;
+    }
 
-      newBoard[charCoor.y] = [...newBoard[charCoor.y]];
-      newBoard[charCoor.y][charCoor.x] = 0;
-      newBoard[rowIdx][columnIdx] = isWarder ? 'w' : 'p';
+    newBoard[charCoor.y] = [...newBoard[charCoor.y]];
+    newBoard[charCoor.y][charCoor.x] = 0;
+    newBoard[rowIdx][columnIdx] = isWarder ? 'w' : 'p';
 
-      return newBoard;
-    });
+    setMatrix(newBoard);
   };
 
   const sendMsg = () => {
@@ -350,8 +416,8 @@ const GamePage = () => {
             className="text-end"
             style={{ display: display ? 'block' : 'none' }}
           >
-            <div class="talk-bubble-right tri-right round btm-right-in">
-              <div class="talktext">{chatMessage}</div>
+            <div className="talk-bubble-right tri-right round btm-right-in">
+              <div className="talktext">{chatMessage}</div>
             </div>
           </Col>
           <Card
@@ -408,13 +474,12 @@ const GamePage = () => {
               <Col className="text-center">
                 <input
                   className="mt-4"
-                  bsSize="lg"
                   placeholder="Enter the text..."
                   onChange={e => setMessage(e.target.value)}
                   value={message}
                 />
                 <button
-                  class="btn btn-outline-secondary"
+                  className="btn btn-outline-secondary"
                   onClick={sendMsg}
                   type="button"
                   id="button-addon2"

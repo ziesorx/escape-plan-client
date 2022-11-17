@@ -49,8 +49,8 @@ const Header = ({
           />
         </div>
 
-        <h4>ROLE : {oppoRole}</h4>
-        <h4>SCORE : {oppoScore}</h4>
+        <h4>{oppoRole} : ROLE</h4>
+        <h4>{oppoScore} : SCORE</h4>
       </div>
     </header>
   );

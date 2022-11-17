@@ -17,8 +17,8 @@ import { avatars } from '../../variables/avatars';
 
 const TestPage = () => {
   useEffect(() => {
-    socket.on('room:create-done', (roomId, userInfo) => {
-      console.log(roomId, userInfo);
+    socket.on('room:create-done', roomDetails => {
+      console.log(roomDetails);
     });
 
     socket.on('room:join-done', (hostInfo, userInfo) => {
@@ -58,8 +58,12 @@ const TestPage = () => {
     });
   }, []);
 
+  const onLoginClick = () => {
+    socket.emit('user:login', 'shit', 1);
+  };
+
   const onCreate = () => {
-    socket.emit('room:create', 'Jackie', 1);
+    socket.emit('room:create');
   };
 
   const onJoin = () => {
@@ -103,6 +107,17 @@ const TestPage = () => {
             >
               <CardBody className="px-lg-5 py-lg-5">
                 <Row>
+                  <Col>
+                    <Button
+                      block
+                      className="mt-4"
+                      onClick={onLoginClick}
+                      size="lg"
+                      color="primary"
+                    >
+                      user:login
+                    </Button>
+                  </Col>
                   <Col>
                     <Button
                       block

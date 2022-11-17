@@ -1,3 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+import Router from 'next/router';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+
 /* eslint-disable @next/next/no-img-element */
 const Layout = ({ children }) => {
   return (

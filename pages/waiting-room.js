@@ -32,7 +32,6 @@ import {
   setCurrentGame,
   setCurrentPlayer,
 } from '../store/features/roomSlice';
-import { current } from '@reduxjs/toolkit';
 import { socket } from '../services/socket';
 
 const Waiting = () => {
@@ -61,7 +60,6 @@ const Waiting = () => {
       dispatch(clearOpponent());
       console.log(roomDetails);
       setIsPlayerLeft(prev => !prev);
-      dispatch(setUser({ ...user, isHost: true }));
     });
   }, []);
 
@@ -102,7 +100,8 @@ const Waiting = () => {
   }, [opponent.name]);
 
   useEffect(() => {
-    if (user.isHost && isPlayerLeft)
+    if (!user.isHost && isPlayerLeft) {
+      dispatch(setUser({ ...user, isHost: true }));
       Swal.fire({
         title: 'YOU ARE HOST!',
         timer: 2000,
@@ -110,9 +109,12 @@ const Waiting = () => {
         icon: 'warning',
         showConfirmButton: false,
       }).then(result => setIsPlayerLeft(prev => !prev));
+    }
   }, [user.isHost, isPlayerLeft]);
 
-  const backToIndex = () => {
+  const backToIndex = e => {
+    e.preventDefault();
+
     dispatch(clearCurrentRoom());
     dispatch(clearCurrentPlayer());
     dispatch(clearOpponent());
@@ -144,7 +146,13 @@ const Waiting = () => {
 
   const renderButton = () => {
     return (
-      <Button color="danger" onClick={toGameroom} size="lg">
+      <Button
+        color="danger"
+        onClick={toGameroom}
+        size="lg"
+        disabled={currentPlayer !== 2 || !user.isHost}
+        style={{ opacity: user.isHost ? 1 : 0 }}
+      >
         <span className="fs-3">Start</span>
       </Button>
     );
@@ -225,7 +233,7 @@ const Waiting = () => {
           </Row>
           <Row className="justify-content-center">
             <Col md="3" className="text-center">
-              {user.isHost && renderButton()}
+              {renderButton()}
             </Col>
           </Row>
           <Row>

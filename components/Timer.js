@@ -1,18 +1,18 @@
-import React, { useState } from 'react'
-import { Row, Col } from 'reactstrap'
-import Countdown from 'react-countdown'
+import React, { useState } from 'react';
+import { Row, Col } from 'reactstrap';
+import Countdown from 'react-countdown';
 
-const Timer = () => {
-  const Completionist = () => <span>You are good to go!</span>
+export const Timer = () => {
+  const Completionist = () => <span>You are good to go!</span>;
 
   const renderer = ({ seconds, completed }) => {
     if (completed) {
-      return <span>time out</span>
+      return <span>time out</span>;
     } else {
       // Render a countdown
-      return <span className="display-3">{seconds}</span>
+      return <span className="display-3">{seconds}</span>;
     }
-  }
+  };
 
   return (
     <Row>
@@ -20,7 +20,5 @@ const Timer = () => {
         <Countdown renderer={renderer} date={Date.now() + 10000} />
       </Col>
     </Row>
-  )
-}
-
-export default Timer
+  );
+};
