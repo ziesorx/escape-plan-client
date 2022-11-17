@@ -1,11 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import Router from 'next/router';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Card, Row, Col, Container } from 'reactstrap';
 import Swal from 'sweetalert2';
 import Header from '../components/Header';
+import Chat from '../components/Chat';
 import { socket } from '../services/socket';
 import {
   clearCurrentPlayer,
@@ -31,8 +32,11 @@ const GamePage = () => {
   const [timer, setTimer] = useState(10);
   const [goingCoor, setGoingCoor] = useState(null);
   const [message, setMessage] = useState('');
-  const [chatMessage, setChatMessage] = useState('');
-  const [display, setDisplay] = useState(false);
+  const [chatMessageLeft, setChatMessageLeft] = useState('');
+  const [chatMessageRight, setChatMessageRight] = useState('');
+  const [displayLeft, setDisplayLeft] = useState(false);
+  const [displayRight, setDisplayRight] = useState(false);
+  const [chatUserInfo, setChatUserInfo] = useState('');
   const dispatch = useDispatch();
 
   const setWarder = gameElement => {
@@ -191,13 +195,25 @@ const GamePage = () => {
         if (!isCancelled) {
           socket.on('game:chat-done', (message, userInfo) => {
             console.log(message);
-            setTimeout(() => {
-              setDisplay(true);
-            }, 500);
-            setTimeout(() => {
-              setDisplay(false);
-            }, 3000);
-            setChatMessage(message);
+            setChatUserInfo(userInfo);
+            if (user.name === userInfo.name) {
+              setTimeout(() => {
+                setDisplayLeft(true);
+              }, 500);
+              setTimeout(() => {
+                setDisplayLeft(false);
+              }, 3000);
+              setChatMessageLeft(message);
+            }
+            if (user.name != userInfo.name) {
+              setTimeout(() => {
+                setDisplayRight(true);
+              }, 500);
+              setTimeout(() => {
+                setDisplayRight(false);
+              }, 3000);
+              setChatMessageRight(message);
+            }
           });
         }
       }, 1000);
@@ -411,15 +427,12 @@ const GamePage = () => {
     <Container className="mt--6" fluid>
       <Row className="justify-content-center mx-auto">
         <Col className="position-relative" md="10">
-          <Col
-            id="chatBox"
-            className="text-end"
-            style={{ display: display ? 'block' : 'none' }}
-          >
-            <div className="talk-bubble-right tri-right round btm-right-in">
-              <div className="talktext">{chatMessage}</div>
-            </div>
-          </Col>
+          <Chat
+            chatMessageLeft={chatMessageLeft}
+            chatMessageRight={chatMessageRight}
+            displayLeft={displayLeft}
+            displayRight={displayRight}
+          ></Chat>
           <Card
             style={{
               backgroundColor: 'rgba(255, 255, 255, 0.8)',
