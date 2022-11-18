@@ -134,12 +134,12 @@ const GamePage = () => {
       const newBoard = JSON.parse(JSON.stringify(map));
       if (winUser.isWarder) {
         newBoard[wCoor[0]][wCoor[1]] = 0;
-        newBoard[pCoor[0]][pCoor[1]] = 'w';
+        newBoard[pCoor[0]][pCoor[1]] = 'ww';
 
         setMatrix(newBoard);
       } else {
         newBoard[pCoor[0]][pCoor[1]] = 0;
-        newBoard[hCoor[0]][hCoor[1]] = 'p';
+        newBoard[hCoor[0]][hCoor[1]] = 'pw';
 
         setMatrix(newBoard);
       }
@@ -419,6 +419,28 @@ const GamePage = () => {
         <>
           <img
             src="/img/hole-icon.png"
+            className="img-fluid"
+            alt="Obstacle pic"
+            style={{ height: '100%', objectFit: 'cover' }}
+          />
+        </>
+      );
+    } else if (character === 'ww') {
+      return (
+        <>
+          <img
+            src="/img/warder-win-pic.png"
+            className="img-fluid"
+            alt="Obstacle pic"
+            style={{ height: '100%', objectFit: 'cover' }}
+          />
+        </>
+      );
+    } else if (character === 'pw') {
+      return (
+        <>
+          <img
+            src="/img/prisoner-win-pic.png"
             className="img-fluid"
             alt="Obstacle pic"
             style={{ height: '100%', objectFit: 'cover' }}
