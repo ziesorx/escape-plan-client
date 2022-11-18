@@ -17,7 +17,7 @@ const Chat = ({
         style={{ display: displayLeft ? 'block' : 'none' }}
       >
         <div className="talk-bubble-left tri-right round btm-left-in">
-          <div className="talktext">{chatMessageLeft}</div>
+          <div className="talktext">{chatMessageLeft.slice(0, 14)}</div>
         </div>
       </Col>
       {/* /right box */}
@@ -27,7 +27,7 @@ const Chat = ({
         style={{ display: displayRight ? 'block' : 'none' }}
       >
         <div className="talk-bubble-right tri-right round btm-right-in">
-          <div className="talktext">{chatMessageRight}</div>
+          <div className="talktext">{chatMessageRight.slice(0, 14)}</div>
         </div>
       </Col>
     </>
