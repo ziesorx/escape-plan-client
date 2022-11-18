@@ -18,6 +18,7 @@ import {
   setOpponent,
   setUser,
 } from '../store/features/userSlice';
+import useSound from 'use-sound';
 
 const GamePage = () => {
   const { user } = useSelector(state => state.user);
@@ -37,7 +38,19 @@ const GamePage = () => {
   const [displayLeft, setDisplayLeft] = useState(false);
   const [displayRight, setDisplayRight] = useState(false);
   const [chatUserInfo, setChatUserInfo] = useState('');
+  const [isWin, setIsWin] = useState(null);
   const dispatch = useDispatch();
+
+  const [mute, setMute] = useState(false);
+  const option = { volume: 0.6, soundEnabled: !mute };
+  const [playDefeat, { stop: stopDefeat }] = useSound(
+    '/sounds/defeat.wav',
+    option
+  );
+  const [playVictory, { stop: stopVictory }] = useSound(
+    '/sounds/victory.wav',
+    option
+  );
 
   const setWarder = gameElement => {
     console.log(gameElement);
@@ -117,7 +130,10 @@ const GamePage = () => {
       if (winnerUserInfo.name === user.name) dispatch(setUser(winnerUserInfo));
       else dispatch(setOpponent(winnerUserInfo));
 
-      if (user.isHost)
+      if (winUser.name === user.name) setIsWin(true);
+      else setIsWin(false);
+
+      if (user.isHost) {
         Swal.fire({
           title: `${winnerUserInfo.name} (${
             winUser.isWarder ? 'Warder' : 'Prisoner'
@@ -138,7 +154,7 @@ const GamePage = () => {
             Router.push('main-menu');
           }
         });
-      else
+      } else {
         Swal.fire({
           title: `${winnerUserInfo.name} (${
             winUser.isWarder ? 'Warder' : 'Prisoner'
@@ -157,6 +173,7 @@ const GamePage = () => {
             Router.push('main-menu');
           }
         });
+      }
     });
 
     socket.on('room:leave-done', roomDetails => {
@@ -191,6 +208,13 @@ const GamePage = () => {
   useEffect(() => {
     setTimer(10);
   }, [isWarderTurn]);
+
+  useEffect(() => {
+    if (isWin === null) return;
+
+    if (isWin) playVictory();
+    else playDefeat();
+  }, [isWin]);
 
   useEffect(() => {
     let isCancelled = false;

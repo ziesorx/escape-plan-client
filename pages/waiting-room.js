@@ -33,6 +33,7 @@ import {
   setCurrentPlayer,
 } from '../store/features/roomSlice';
 import { socket } from '../services/socket';
+import useSound from 'use-sound';
 
 const Waiting = () => {
   const { user } = useSelector(state => state.user);
@@ -40,6 +41,10 @@ const Waiting = () => {
   const { currentRoom } = useSelector(state => state.room);
   const { currentPlayer } = useSelector(state => state.room);
   const [isPlayerLeft, setIsPlayerLeft] = useState(false);
+
+  const [mute, setMute] = useState(true);
+  const option = { volume: 0.6, soundEnabled: !mute };
+  const [playJoin] = useSound('/sounds/join.wav', option);
 
   const userAvatar = avatars.filter(avatar => avatar.id === user.avatarId);
   const opponentAvatar = avatars.filter(
@@ -63,6 +68,13 @@ const Waiting = () => {
       setIsPlayerLeft(prev => !prev);
     });
   }, []);
+
+  useEffect(() => {
+    if (!mute) {
+      playJoin();
+      setMute(true);
+    }
+  }, [mute]);
 
   useEffect(() => {
     if (opponent.name) {
@@ -95,8 +107,7 @@ const Waiting = () => {
           },
         }).then(result => {
           if (result.dismiss === Swal.DismissReason.timer) {
-            console.log(message);
-            !!message && Router.push('/game-time');
+            Router.push('/game-time');
           }
         });
       });
@@ -115,6 +126,12 @@ const Waiting = () => {
       }).then(result => setIsPlayerLeft(prev => !prev));
     }
   }, [user.isHost, isPlayerLeft]);
+
+  useEffect(() => {
+    if (currentPlayer === 2) {
+      setMute(false);
+    }
+  }, [currentPlayer]);
 
   const backToIndex = e => {
     e.preventDefault();
