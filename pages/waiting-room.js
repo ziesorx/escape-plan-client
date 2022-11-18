@@ -65,7 +65,7 @@ const Waiting = () => {
 
   useEffect(() => {
     if (opponent.name) {
-      socket.on('room:starting-done', message => {
+      socket.on('room:starting-done', () => {
         let timerInterval;
         Swal.fire({
           allowOutsideClick: false,
@@ -91,8 +91,7 @@ const Waiting = () => {
           },
         }).then(result => {
           if (result.dismiss === Swal.DismissReason.timer) {
-            console.log(message);
-            !!message && Router.push('/game-time');
+            Router.push('/game-time');
           }
         });
       });
@@ -251,7 +250,7 @@ const Waiting = () => {
               </Button>
             </Col>
             <Modal isOpen={modal} toggle={toggle}>
-              <ModalHeader toggle={toggle}>How to play this game</ModalHeader>
+              <ModalHeader toggle={toggle}>TUTORIAL</ModalHeader>
               <ModalBody>
                 One day, there is a man whos a prisoner, and he stole the most
                 prestiegeous diamond in the world from the most famous shop
