@@ -73,6 +73,38 @@ const Waiting = () => {
       console.log(roomDetails);
       setIsPlayerLeft(prev => !prev);
     });
+
+    socket.on('user:disconnect', roomDetails => {
+      if (roomDetails.users.length < 2) {
+        let timerInterval;
+        Swal.fire({
+          title: `Other player has left the room!`,
+          html: 'Leaving the room in <strong></strong> seconds.',
+          timer: 5300,
+          timerProgressBar: true,
+          showDenyButton: true,
+          showConfirmButton: false,
+          denyButtonText: `Leave room`,
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+
+            const b = Swal.getHtmlContainer().querySelector('strong');
+            timerInterval = setInterval(() => {
+              b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0);
+            }, 100);
+          },
+        }).then(result => {
+          if (result.isDenied || result.dismiss === Swal.DismissReason.timer) {
+            dispatch(clearCurrentRoom());
+            dispatch(clearCurrentPlayer());
+            dispatch(clearOpponent());
+            socket.emit('room:leave');
+            Router.push('main-menu');
+          }
+        });
+      }
+    });
   }, []);
 
   useEffect(() => {
