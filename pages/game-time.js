@@ -154,6 +154,12 @@ const GamePage = () => {
             winUser.isWarder ? 'Warder' : 'Prisoner'
           }) win!`,
           text: `Waiting for host to start over...`,
+          imageUrl: winUser.isWarder
+            ? 'img/warder-win-pic.png'
+            : 'img/prisoner-win-pic.png',
+          imageWidth: 200,
+          imageHeight: 200,
+          imageAlt: 'Custom image',
           showDenyButton: true,
           confirmButtonText: 'Play again?',
           denyButtonText: `Leave room`,
@@ -175,6 +181,12 @@ const GamePage = () => {
             winUser.isWarder ? 'Warder' : 'Prisoner'
           }) win!`,
           text: `Waiting for host to start over...`,
+          imageUrl: winUser.isWarder
+            ? 'img/warder-win-pic.png'
+            : 'img/prisoner-win-pic.png',
+          imageWidth: 200,
+          imageHeight: 200,
+          imageAlt: 'Custom image',
           showDenyButton: true,
           showConfirmButton: false,
           denyButtonText: `Leave room`,
