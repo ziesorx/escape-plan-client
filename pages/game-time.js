@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import Router from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Card,
@@ -66,6 +66,8 @@ const GamePage = () => {
     '/sounds/victory.wav',
     option
   );
+  const inputRef = useRef(null);
+  const [inputFocus, setInputFocus] = useState(false);
 
   const setWarder = gameElement => {
     console.log(gameElement);
@@ -247,37 +249,57 @@ const GamePage = () => {
     let isCancelled = false;
     const messageChange = async () => {
       setTimeout(() => {
-        if (!isCancelled) {
-          socket.on('game:chat-done', (message, userInfo) => {
-            console.log(message);
-            setChatUserInfo(userInfo);
-            if (user.name === userInfo.name) {
-              setTimeout(() => {
-                setDisplayLeft(true);
-              }, 500);
-              setTimeout(() => {
-                setDisplayLeft(false);
-              }, 3000);
+        socket.on('game:chat-done', (message, userInfo) => {
+          console.log(message);
+          setChatUserInfo(userInfo);
+
+          if (user.name === userInfo.name) {
+            setTimeout(() => {
               setChatMessageLeft(message);
-            }
-            if (user.name != userInfo.name) {
-              setTimeout(() => {
-                setDisplayRight(true);
-              }, 500);
-              setTimeout(() => {
-                setDisplayRight(false);
-              }, 3000);
+              setDisplayLeft(true);
+            }, 500);
+            setTimeout(() => {
+              setDisplayLeft(false);
+              setChatMessageLeft('');
+            }, 3000);
+          }
+          if (user.name != userInfo.name) {
+            setTimeout(() => {
               setChatMessageRight(message);
-            }
-          });
-        }
+              setDisplayRight(true);
+            }, 500);
+            setTimeout(() => {
+              setDisplayRight(false);
+              setChatMessageRight('');
+            }, 3000);
+          }
+        });
       }, 1000);
     };
     messageChange();
-    return () => {
-      isCancelled = true;
-    };
   }, [message]);
+
+  useOnKeyDown(
+    useCallback(
+      e => {
+        if (e.key === 't' && !inputFocus) {
+          e.preventDefault();
+          setInputFocus(true);
+        } else if (e.key === 'Escape') {
+          setInputFocus(false);
+        } else if (e.key === 'Enter') {
+          sendMsg(message);
+          inputBox.blur();
+        }
+      },
+      [message, inputFocus]
+    )
+  );
+
+  useEffect(() => {
+    if (inputFocus) inputRef.current?.focus();
+    else inputRef.current?.blur();
+  }, [inputFocus]);
 
   useEffect(() => {
     if (currentPlayer === 1) {
@@ -396,7 +418,7 @@ const GamePage = () => {
       return (
         <>
           <img
-            src="/img/instruction-icon.jpg"
+            src="/img/hole-icon.png"
             className="img-fluid"
             alt="Obstacle pic"
             style={{ height: '100%', objectFit: 'cover' }}
@@ -463,9 +485,8 @@ const GamePage = () => {
     setMatrix(newBoard);
   };
 
-  const sendMsg = () => {
-    socket.emit('game:chat', message);
-    console.log(message);
+  const sendMsg = sendMessage => {
+    socket.emit('game:chat', sendMessage);
     setMessage('');
   };
 
@@ -540,6 +561,14 @@ const GamePage = () => {
 
   if (!matrix) return;
 
+  const renderPlaceholder = () => {
+    return (
+      <>
+        Press <strong>t</strong> to type...
+      </>
+    );
+  };
+
   return (
     <Container className="mt--6" fluid>
       <Row className="justify-content-center mx-auto">
@@ -603,10 +632,17 @@ const GamePage = () => {
             <Row className="justify-content-center">
               <Col className="text-center">
                 <input
+                  ref={inputRef}
+                  id="inputBox"
                   className="mt-4"
-                  placeholder="Enter the text..."
+                  placeholder="Press t to type message..."
                   onChange={e => setMessage(e.target.value)}
                   value={message}
+                  onClick={() => {
+                    setInputFocus(true);
+                    inputRef.current?.focus();
+                  }}
+                  onBlur={() => setInputFocus(false)}
                 />
                 <button
                   className="btn btn-outline-secondary"
@@ -637,3 +673,12 @@ const GamePage = () => {
 };
 
 export default GamePage;
+
+function useOnKeyDown(callback) {
+  useEffect(() => {
+    document.addEventListener('keydown', callback);
+    return () => {
+      document.removeEventListener('keydown', callback);
+    };
+  }, [callback]);
+}

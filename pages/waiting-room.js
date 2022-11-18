@@ -84,7 +84,7 @@ const Waiting = () => {
 
   useEffect(() => {
     if (opponent.name) {
-      socket.on('room:starting-done', message => {
+      socket.on('room:starting-done', () => {
         let timerInterval;
         Swal.fire({
           allowOutsideClick: false,
