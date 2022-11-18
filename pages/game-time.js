@@ -1,9 +1,23 @@
+/* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import Router from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, Row, Col, Container } from 'reactstrap';
+import {
+  Card,
+  Row,
+  Col,
+  Container,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  Carousel,
+  CarouselItem,
+  CarouselControl,
+  CarouselIndicators,
+  CarouselCaption,
+} from 'reactstrap';
 import Swal from 'sweetalert2';
 import Header from '../components/Header';
 import Chat from '../components/Chat';
@@ -18,6 +32,7 @@ import {
   setOpponent,
   setUser,
 } from '../store/features/userSlice';
+import { tutorials } from '../variables/tutorials';
 import useSound from 'use-sound';
 
 const GamePage = () => {
@@ -442,6 +457,75 @@ const GamePage = () => {
     setMessage('');
   };
 
+  const [showModal, setShowModal] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+
+  const slides = tutorials.map(tutorial => {
+    return (
+      <CarouselItem
+        onExiting={() => setAnimating(true)}
+        onExited={() => setAnimating(false)}
+        key={tutorial.id}
+      >
+        <img src={tutorial.src} alt={tutorial.text} />
+        <CarouselCaption
+          captionText={tutorial.text}
+          captionHeader={tutorial.text}
+        />
+      </CarouselItem>
+    );
+  });
+
+  const next = () => {
+    if (animating) return;
+    setActiveIndex(prev => prev + 1);
+  };
+
+  const previous = () => {
+    if (animating) return;
+    setActiveIndex(prev => prev - 1);
+  };
+
+  const goToIndex = newIndex => {
+    if (animating) return;
+    setActiveIndex(newIndex);
+  };
+
+  const renderModal = () => {
+    return (
+      <Modal isOpen={showModal} toggle={() => setShowModal(prev => !prev)}>
+        <ModalHeader toggle={() => setShowModal(prev => !prev)}>
+          Tutorial
+        </ModalHeader>
+        <ModalBody>
+          <Carousel activeIndex={activeIndex} next={next} previous={previous}>
+            <CarouselIndicators
+              items={tutorials}
+              activeIndex={activeIndex}
+              onClickHandler={goToIndex}
+            />
+            {slides}
+            {activeIndex !== 0 && (
+              <CarouselControl
+                direction="prev"
+                directionText="Previous"
+                onClickHandler={previous}
+              />
+            )}
+            {activeIndex !== tutorials.length - 1 && (
+              <CarouselControl
+                direction="next"
+                directionText="Next"
+                onClickHandler={next}
+              />
+            )}
+          </Carousel>
+        </ModalBody>
+      </Modal>
+    );
+  };
+
   if (!matrix) return;
 
   return (
@@ -523,6 +607,16 @@ const GamePage = () => {
                 </button>
               </Col>
             </Row>
+            <a
+              className="instruction mb-1 mx-1 position-absolute bottom-0 end-0"
+              onClick={() => setShowModal(prev => !prev)}
+            >
+              <img
+                src="/img/instruction-icon.jpg"
+                className="img-fluid rounded w-100"
+              />
+            </a>
+            {renderModal()}
           </Card>
         </Col>
       </Row>

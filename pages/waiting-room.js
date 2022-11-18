@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import Router from 'next/router';
@@ -18,7 +19,11 @@ import {
   Modal,
   ModalHeader,
   ModalBody,
-  ModalFooter,
+  Carousel,
+  CarouselItem,
+  CarouselControl,
+  CarouselIndicators,
+  CarouselCaption,
 } from 'reactstrap';
 
 import userSlice, {
@@ -34,6 +39,7 @@ import {
 } from '../store/features/roomSlice';
 import { socket } from '../services/socket';
 import useSound from 'use-sound';
+import { tutorials } from '../variables/tutorials';
 
 const Waiting = () => {
   const { user } = useSelector(state => state.user);
@@ -179,6 +185,82 @@ const Waiting = () => {
     );
   };
 
+  // Tutorial Modal
+  const [showModal, setShowModal] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+
+  const slides = tutorials.map(tutorial => {
+    return (
+      <CarouselItem
+        onExiting={() => setAnimating(true)}
+        onExited={() => setAnimating(false)}
+        key={tutorial.id}
+      >
+        <img src={tutorial.src} alt={tutorial.text} />
+        <CarouselCaption
+          className="text-dark"
+          captionHeader={tutorial.header}
+          captionText={tutorial.text}
+        />
+      </CarouselItem>
+    );
+  });
+
+  const next = () => {
+    if (animating) return;
+
+    if (activeIndex < 2) setActiveIndex(prev => prev + 1);
+  };
+
+  const previous = () => {
+    if (animating) return;
+
+    if (activeIndex > 0) setActiveIndex(prev => prev - 1);
+  };
+
+  const goToIndex = newIndex => {
+    if (animating) return;
+
+    if (newIndex < 2) setActiveIndex(newIndex);
+  };
+
+  const renderModal = () => {
+    return (
+      <Modal isOpen={showModal} toggle={() => setShowModal(prev => !prev)}>
+        <ModalHeader toggle={() => setShowModal(prev => !prev)}>
+          Tutorial
+        </ModalHeader>
+        <ModalBody className="p-0">
+          <div className="rounded-bottom overflow-hidden">
+            <Carousel activeIndex={activeIndex} next={next} previous={previous}>
+              <CarouselIndicators
+                items={tutorials}
+                activeIndex={activeIndex}
+                onClickHandler={goToIndex}
+              />
+              {slides}
+              {activeIndex !== 0 && (
+                <CarouselControl
+                  direction="prev"
+                  directionText="Previous"
+                  onClickHandler={previous}
+                />
+              )}
+              {activeIndex !== tutorials.length - 1 && (
+                <CarouselControl
+                  direction="next"
+                  directionText="Next"
+                  onClickHandler={next}
+                />
+              )}
+            </Carousel>
+          </div>
+        </ModalBody>
+      </Modal>
+    );
+  };
+
   return (
     <Container className="h-100 d-flex justify-content-center" fluid>
       <Card className="waiting-card">
@@ -264,35 +346,17 @@ const Waiting = () => {
             </Col>
             <Col md="4"></Col>
             <Col md="4">
-              <Button
-                className="mb-2 mx-2 btn-create position-absolute bottom-0 end-0"
-                onClick={toggle}
+              <a
+                className="instruction mb-1 mx-1 position-absolute bottom-0 end-0"
+                onClick={() => setShowModal(prev => !prev)}
               >
-                ?
-              </Button>
+                <img
+                  src="/img/instruction-icon.jpg"
+                  className="img-fluid rounded w-100"
+                />
+              </a>
             </Col>
-            <Modal isOpen={modal} toggle={toggle}>
-              <ModalHeader toggle={toggle}>How to play this game</ModalHeader>
-              <ModalBody>
-                One day, there is a man whos a prisoner, and he stole the most
-                prestiegeous diamond in the world from the most famous shop
-                keeper or warder. To win the game try your best to escape or
-                catch the chad!!!
-                <br />
-                <br /> - Recieve the role of either warder or
-                <br /> &nbsp;&nbsp;prisoner at the top-left of the page
-                <br /> - Warder will start first
-                <br /> - 10 seconds each round to walk
-                <Card>
-                  <img src="/img/gigachad.jpeg" alt="gigachad"></img>
-                </Card>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="dark" onClick={toggle}>
-                  Close
-                </Button>{' '}
-              </ModalFooter>
-            </Modal>
+            {renderModal()}
           </Row>
         </Row>
       </Card>
