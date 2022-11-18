@@ -52,6 +52,7 @@ const Waiting = () => {
 
   useEffect(() => {
     socket.on('room:start-done', gameElement => {
+      console.log(gameElement);
       dispatch(setCurrentGame(gameElement));
     });
 
@@ -77,8 +78,11 @@ const Waiting = () => {
             Swal.showLoading();
 
             if (user.isHost) {
-              console.log(userName, opponent.name);
               socket.emit('room:start', userName, opponentName);
+
+              socket.on('room:error', message => {
+                console.log(message);
+              });
             }
 
             const b = Swal.getHtmlContainer().querySelector('strong');

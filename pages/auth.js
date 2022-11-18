@@ -33,6 +33,21 @@ const Auth = () => {
 
       Router.push('/main-menu');
     });
+
+    socket.on('user:error', message => {
+      if (message === 'already login') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'This user already in server',
+          confirmButtonText: 'Try again',
+          allowOutsideClick: false,
+        }).then(result => {
+          setDisButton(false);
+          setName('');
+        });
+      }
+    });
   }, []);
 
   const renderSpinner = () => {
@@ -91,7 +106,7 @@ const Auth = () => {
       <Container className="mt--6 pb-5" fluid>
         <Row className="justify-content-center mx-auto">
           <Col md="8">
-            <Card className="main-card">
+            <Card className="auth-card">
               <CardBody className="px-lg-5 py-lg-5">
                 <div className="text-center mb-5">
                   <strong className="fs-1">

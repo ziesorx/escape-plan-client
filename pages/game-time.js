@@ -164,6 +164,10 @@ const GamePage = () => {
       dispatch(clearOpponent());
       dispatch(setUser({ ...user, isHost: true }));
     });
+
+    socket.on('game:error', gameElement => {
+      console.log(gameElement);
+    });
   }, []);
 
   useEffect(() => {
@@ -175,7 +179,9 @@ const GamePage = () => {
 
     if (timer === 0) {
       if (isWarder === isWarderTurn) {
+        console.log('shit');
         socket.emit('game:update', goingCoor, isWarderTurn);
+        return;
       }
     }
 
