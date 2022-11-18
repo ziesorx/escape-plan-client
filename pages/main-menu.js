@@ -22,6 +22,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { setUser, setOpponent } from '../store/features/userSlice';
 import { setCurrentPlayer, setCurrentRoom } from '../store/features/roomSlice';
+import useSound from 'use-sound';
 
 const LandingPage = () => {
   const [roomId, setRoomId] = useState('');
@@ -35,6 +36,10 @@ const LandingPage = () => {
   const dispatch = useDispatch();
   const invalidRoom = false;
 
+  const [mute, setMute] = useState(true);
+  const option = { volume: 0.6, soundEnabled: !mute };
+  const [playJoin] = useSound('/sounds/join.wav', option);
+
   useEffect(() => {
     socket.on('room:all-done', rooms => {
       setRooms(rooms);
@@ -47,6 +52,7 @@ const LandingPage = () => {
       console.log(roomDetails.users.length);
       console.log(roomDetails.users[0]);
 
+      setMute(false);
       Router.push('/waiting-room');
     });
 
@@ -64,6 +70,12 @@ const LandingPage = () => {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (!mute) {
+      playJoin();
+    }
+  }, [mute]);
 
   const onCreateClick = () => {
     setDisCreateButton(true);
@@ -144,6 +156,7 @@ const LandingPage = () => {
         });
       } else {
         setDisJoinButton(false);
+        setMute(false);
         Router.push('/waiting-room');
       }
     });

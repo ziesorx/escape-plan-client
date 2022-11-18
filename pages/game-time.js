@@ -1,9 +1,23 @@
+/* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import Router from 'next/router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, Row, Col, Container } from 'reactstrap';
+import {
+  Card,
+  Row,
+  Col,
+  Container,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  Carousel,
+  CarouselItem,
+  CarouselControl,
+  CarouselIndicators,
+  CarouselCaption,
+} from 'reactstrap';
 import Swal from 'sweetalert2';
 import Header from '../components/Header';
 import Chat from '../components/Chat';
@@ -18,6 +32,8 @@ import {
   setOpponent,
   setUser,
 } from '../store/features/userSlice';
+import { tutorials } from '../variables/tutorials';
+import useSound from 'use-sound';
 
 const GamePage = () => {
   const { user } = useSelector(state => state.user);
@@ -37,10 +53,21 @@ const GamePage = () => {
   const [displayLeft, setDisplayLeft] = useState(false);
   const [displayRight, setDisplayRight] = useState(false);
   const [chatUserInfo, setChatUserInfo] = useState('');
+  const [isWin, setIsWin] = useState(null);
   const dispatch = useDispatch();
 
   const inputRef = useRef(null);
   const [inputFocus, setInputFocus] = useState(false);
+  const [mute, setMute] = useState(false);
+  const option = { volume: 0.6, soundEnabled: !mute };
+  const [playDefeat, { stop: stopDefeat }] = useSound(
+    '/sounds/defeat.wav',
+    option
+  );
+  const [playVictory, { stop: stopVictory }] = useSound(
+    '/sounds/victory.wav',
+    option
+  );
 
   const setWarder = gameElement => {
     console.log(gameElement);
@@ -120,12 +147,21 @@ const GamePage = () => {
       if (winnerUserInfo.name === user.name) dispatch(setUser(winnerUserInfo));
       else dispatch(setOpponent(winnerUserInfo));
 
-      if (user.isHost)
+      if (winUser.name === user.name) setIsWin(true);
+      else setIsWin(false);
+
+      if (user.isHost) {
         Swal.fire({
           title: `${winnerUserInfo.name} (${
             winUser.isWarder ? 'Warder' : 'Prisoner'
           }) win!`,
           text: `Waiting for host to start over...`,
+          imageUrl: winUser.isWarder
+            ? 'img/warder-win-pic.png'
+            : 'img/prisoner-win-pic.png',
+          imageWidth: 200,
+          imageHeight: 200,
+          imageAlt: 'Custom image',
           showDenyButton: true,
           confirmButtonText: 'Play again?',
           denyButtonText: `Leave room`,
@@ -141,12 +177,18 @@ const GamePage = () => {
             Router.push('main-menu');
           }
         });
-      else
+      } else {
         Swal.fire({
           title: `${winnerUserInfo.name} (${
             winUser.isWarder ? 'Warder' : 'Prisoner'
           }) win!`,
           text: `Waiting for host to start over...`,
+          imageUrl: winUser.isWarder
+            ? 'img/warder-win-pic.png'
+            : 'img/prisoner-win-pic.png',
+          imageWidth: 200,
+          imageHeight: 200,
+          imageAlt: 'Custom image',
           showDenyButton: true,
           showConfirmButton: false,
           denyButtonText: `Leave room`,
@@ -160,12 +202,17 @@ const GamePage = () => {
             Router.push('main-menu');
           }
         });
+      }
     });
 
     socket.on('room:leave-done', roomDetails => {
       dispatch(setCurrentPlayer(roomDetails.users.length));
       dispatch(clearOpponent());
       dispatch(setUser({ ...user, isHost: true }));
+    });
+
+    socket.on('game:error', gameElement => {
+      console.log(gameElement);
     });
   }, []);
 
@@ -178,7 +225,9 @@ const GamePage = () => {
 
     if (timer === 0) {
       if (isWarder === isWarderTurn) {
+        console.log('shit');
         socket.emit('game:update', goingCoor, isWarderTurn);
+        return;
       }
     }
 
@@ -190,6 +239,14 @@ const GamePage = () => {
   }, [isWarderTurn]);
 
   useEffect(() => {
+    if (isWin === null) return;
+
+    if (isWin) playVictory();
+    else playDefeat();
+  }, [isWin]);
+
+  useEffect(() => {
+    let isCancelled = false;
     const messageChange = async () => {
       setTimeout(() => {
         socket.on('game:chat-done', (message, userInfo) => {
@@ -433,6 +490,75 @@ const GamePage = () => {
     setMessage('');
   };
 
+  const [showModal, setShowModal] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+
+  const slides = tutorials.map(tutorial => {
+    return (
+      <CarouselItem
+        onExiting={() => setAnimating(true)}
+        onExited={() => setAnimating(false)}
+        key={tutorial.id}
+      >
+        <img src={tutorial.src} alt={tutorial.text} />
+        <CarouselCaption
+          captionText={tutorial.text}
+          captionHeader={tutorial.text}
+        />
+      </CarouselItem>
+    );
+  });
+
+  const next = () => {
+    if (animating) return;
+    setActiveIndex(prev => prev + 1);
+  };
+
+  const previous = () => {
+    if (animating) return;
+    setActiveIndex(prev => prev - 1);
+  };
+
+  const goToIndex = newIndex => {
+    if (animating) return;
+    setActiveIndex(newIndex);
+  };
+
+  const renderModal = () => {
+    return (
+      <Modal isOpen={showModal} toggle={() => setShowModal(prev => !prev)}>
+        <ModalHeader toggle={() => setShowModal(prev => !prev)}>
+          Tutorial
+        </ModalHeader>
+        <ModalBody>
+          <Carousel activeIndex={activeIndex} next={next} previous={previous}>
+            <CarouselIndicators
+              items={tutorials}
+              activeIndex={activeIndex}
+              onClickHandler={goToIndex}
+            />
+            {slides}
+            {activeIndex !== 0 && (
+              <CarouselControl
+                direction="prev"
+                directionText="Previous"
+                onClickHandler={previous}
+              />
+            )}
+            {activeIndex !== tutorials.length - 1 && (
+              <CarouselControl
+                direction="next"
+                directionText="Next"
+                onClickHandler={next}
+              />
+            )}
+          </Carousel>
+        </ModalBody>
+      </Modal>
+    );
+  };
+
   if (!matrix) return;
 
   const renderPlaceholder = () => {
@@ -529,6 +655,16 @@ const GamePage = () => {
                 </button>
               </Col>
             </Row>
+            <a
+              className="instruction mb-1 mx-1 position-absolute bottom-0 end-0"
+              onClick={() => setShowModal(prev => !prev)}
+            >
+              <img
+                src="/img/instruction-icon.jpg"
+                className="img-fluid rounded w-100"
+              />
+            </a>
+            {renderModal()}
           </Card>
         </Col>
       </Row>
