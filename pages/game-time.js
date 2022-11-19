@@ -666,6 +666,7 @@ const GamePage = () => {
     setMessage('');
   };
 
+  // Tutorial Modal
   const [showModal, setShowModal] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
@@ -679,8 +680,9 @@ const GamePage = () => {
       >
         <img src={tutorial.src} alt={tutorial.text} />
         <CarouselCaption
+          className="text-dark"
+          captionHeader={tutorial.header}
           captionText={tutorial.text}
-          captionHeader={tutorial.text}
         />
       </CarouselItem>
     );
@@ -688,17 +690,20 @@ const GamePage = () => {
 
   const next = () => {
     if (animating) return;
-    setActiveIndex(prev => prev + 1);
+
+    if (activeIndex < 2) setActiveIndex(prev => prev + 1);
   };
 
   const previous = () => {
     if (animating) return;
-    setActiveIndex(prev => prev - 1);
+
+    if (activeIndex > 0) setActiveIndex(prev => prev - 1);
   };
 
   const goToIndex = newIndex => {
     if (animating) return;
-    setActiveIndex(newIndex);
+
+    if (newIndex < 2) setActiveIndex(newIndex);
   };
 
   const renderModal = () => {
@@ -707,29 +712,31 @@ const GamePage = () => {
         <ModalHeader toggle={() => setShowModal(prev => !prev)}>
           Tutorial
         </ModalHeader>
-        <ModalBody>
-          <Carousel activeIndex={activeIndex} next={next} previous={previous}>
-            <CarouselIndicators
-              items={tutorials}
-              activeIndex={activeIndex}
-              onClickHandler={goToIndex}
-            />
-            {slides}
-            {activeIndex !== 0 && (
-              <CarouselControl
-                direction="prev"
-                directionText="Previous"
-                onClickHandler={previous}
+        <ModalBody className="p-0">
+          <div className="rounded-bottom overflow-hidden">
+            <Carousel activeIndex={activeIndex} next={next} previous={previous}>
+              <CarouselIndicators
+                items={tutorials}
+                activeIndex={activeIndex}
+                onClickHandler={goToIndex}
               />
-            )}
-            {activeIndex !== tutorials.length - 1 && (
-              <CarouselControl
-                direction="next"
-                directionText="Next"
-                onClickHandler={next}
-              />
-            )}
-          </Carousel>
+              {slides}
+              {activeIndex !== 0 && (
+                <CarouselControl
+                  direction="prev"
+                  directionText="Previous"
+                  onClickHandler={previous}
+                />
+              )}
+              {activeIndex !== tutorials.length - 1 && (
+                <CarouselControl
+                  direction="next"
+                  directionText="Next"
+                  onClickHandler={next}
+                />
+              )}
+            </Carousel>
+          </div>
         </ModalBody>
       </Modal>
     );
