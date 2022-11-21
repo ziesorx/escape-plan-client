@@ -27,12 +27,14 @@ import Swal from 'sweetalert2';
 import Header from '../components/Header';
 import Chat from '../components/Chat';
 import { socket } from '../services/socket';
+
 import {
   clearCurrentGame,
   clearCurrentPlayer,
   clearCurrentRoom,
   setCurrentPlayer,
 } from '../store/features/roomSlice';
+
 import {
   clearOpponent,
   setOpponent,
@@ -221,6 +223,9 @@ const GamePage = () => {
       const winUser = gameElement.users.filter(
         user => user.name === winnerUserInfo.name
       )[0];
+
+      if (winnerUserInfo.name === user.name) dispatch(setUser(winnerUserInfo));
+      else dispatch(setOpponent(winnerUserInfo));
 
       const { hCoor, wCoor, pCoor, map } = gameElement.mapDetail;
       const newBoard = JSON.parse(JSON.stringify(map));
