@@ -4,6 +4,8 @@
 import Router from 'next/router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faVolumeUp, faVolumeMute } from '@fortawesome/free-solid-svg-icons';
 import {
   Button,
   Card,
@@ -70,6 +72,10 @@ const GamePage = () => {
   );
   const [playVictory, { stop: stopVictory }] = useSound(
     '/sounds/victory.wav',
+    option
+  );
+  const [playWalk, { stop: stopWalk }] = useSound(
+    '/sounds/walking.mp3',
     option
   );
   const inputRef = useRef(null);
@@ -394,6 +400,14 @@ const GamePage = () => {
   }, [isWin]);
 
   useEffect(() => {
+    if (mute === true) {
+      stopDefeat();
+      stopVictory();
+      stopWalk();
+    }
+  }, [mute]);
+
+  useEffect(() => {
     let isCancelled = false;
     const messageChange = async () => {
       setTimeout(() => {
@@ -666,6 +680,10 @@ const GamePage = () => {
     setMessage('');
   };
 
+  const volumeOnOff = () => {
+    setMute(prev => !prev);
+  };
+
   // Tutorial Modal
   const [showModal, setShowModal] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -792,6 +810,7 @@ const GamePage = () => {
                             onClick={() => {
                               if (isWarder === isWarderTurn && !alreadyWalk) {
                                 updateCurrentBoard(rowIdx, columnIdx);
+                                playWalk();
                               }
                             }}
                           >
@@ -809,6 +828,14 @@ const GamePage = () => {
               style={{ marginRight: '4rem', marginLeft: '0.5rem' }}
             >
               <Col className="d-flex text-center">
+                <a onClick={volumeOnOff}>
+                  <FontAwesomeIcon
+                    id="volumeIcon"
+                    icon={mute === false ? faVolumeUp : faVolumeMute}
+                    size="2x"
+                    className=""
+                  />
+                </a>
                 <InputGroup size="sm">
                   <Input
                     maxLength={14}
@@ -822,6 +849,7 @@ const GamePage = () => {
                       setInputFocus(true);
                       inputRef.current?.focus();
                     }}
+                    autoComplete="off"
                     onBlur={() => setInputFocus(false)}
                   />
                   <Button
