@@ -24,8 +24,8 @@ const Header = ({
           <img
             alt="profile picture"
             src={avatars.find(avatar => avatar.id === myImg)?.img_src}
-            className="img-fluid rounded-circle w-25"
-            style={{ objectFit: 'fill', aspectRatio: '1' }}
+            className="img-fluid rounded-circle"
+            style={{ objectFit: 'fill', aspectRatio: '1', width: '18%' }}
           />
           <span className="h4 mb-0">{myName ?? 'poraor'}</span>
         </div>
@@ -44,8 +44,8 @@ const Header = ({
           <img
             alt="profile picture"
             src={avatars.find(avatar => avatar.id === oppoImg)?.img_src}
-            className="img-fluid rounded-circle w-25"
-            style={{ objectFit: 'fill', aspectRatio: '1' }}
+            className="img-fluid rounded-circle"
+            style={{ objectFit: 'fill', aspectRatio: '1', width: '18%' }}
           />
         </div>
 

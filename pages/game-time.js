@@ -5,6 +5,7 @@ import Router from 'next/router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  Button,
   Card,
   Row,
   Col,
@@ -17,12 +18,15 @@ import {
   CarouselControl,
   CarouselIndicators,
   CarouselCaption,
+  Input,
+  InputGroup,
 } from 'reactstrap';
 import Swal from 'sweetalert2';
 import Header from '../components/Header';
 import Chat from '../components/Chat';
 import { socket } from '../services/socket';
 import {
+  clearCurrentGame,
   clearCurrentPlayer,
   clearCurrentRoom,
   setCurrentPlayer,
@@ -32,6 +36,7 @@ import {
   setOpponent,
   setUser,
 } from '../store/features/userSlice';
+import 'animate.css';
 import { tutorials } from '../variables/tutorials';
 import useSound from 'use-sound';
 
@@ -46,6 +51,7 @@ const GamePage = () => {
   const [alreadyWalk, setAlreadyWalk] = useState(false);
   const [matrix, setMatrix] = useState(null);
   const [timer, setTimer] = useState(10);
+  const [startCount, setStartCount] = useState(false);
   const [goingCoor, setGoingCoor] = useState(null);
   const [message, setMessage] = useState('');
   const [chatMessageLeft, setChatMessageLeft] = useState('');
@@ -56,8 +62,6 @@ const GamePage = () => {
   const [isWin, setIsWin] = useState(null);
   const dispatch = useDispatch();
 
-  const inputRef = useRef(null);
-  const [inputFocus, setInputFocus] = useState(false);
   const [mute, setMute] = useState(false);
   const option = { volume: 0.6, soundEnabled: !mute };
   const [playDefeat, { stop: stopDefeat }] = useSound(
@@ -68,6 +72,8 @@ const GamePage = () => {
     '/sounds/victory.wav',
     option
   );
+  const inputRef = useRef(null);
+  const [inputFocus, setInputFocus] = useState(false);
 
   const setWarder = gameElement => {
     console.log(gameElement);
@@ -78,6 +84,27 @@ const GamePage = () => {
 
     if (myUser.isWarder) setGoingCoor(gameElement.mapDetail.wCoor);
     else setGoingCoor(gameElement.mapDetail.pCoor);
+
+    Swal.fire({
+      title: `You are ${myUser.isWarder ? 'Warder' : 'Prisoner'}`,
+      imageUrl: myUser.isWarder
+        ? 'img/warder-icon.png'
+        : 'img/prisoner-icon.png',
+      imageWidth: 100,
+      imageHeight: 100,
+      imageAlt: 'role image',
+      showClass: {
+        popup: 'animate__animated animate__fadeInLeft',
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutRight',
+      },
+      showConfirmButton: false,
+      timer: 2000,
+      allowOutsideClick: false,
+    }).then(result => {
+      if (result.dismiss === Swal.DismissReason.timer) setStartCount(true);
+    });
   };
 
   useEffect(() => {
@@ -114,6 +141,64 @@ const GamePage = () => {
           setGoingCoor(null);
           setIsWarderTurn(true);
           setTimer(10);
+
+          Swal.fire({
+            title: `You are ${myUser.isWarder ? 'Warder' : 'Prisoner'}`,
+            imageUrl: myUser.isWarder
+              ? 'img/warder-icon.png'
+              : 'img/prisoner-icon.png',
+            imageWidth: 100,
+            imageHeight: 100,
+            imageAlt: 'role image',
+            showClass: {
+              popup: 'animate__animated animate__fadeInLeft',
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOutRight',
+            },
+            showConfirmButton: false,
+            timer: 2000,
+            allowOutsideClick: false,
+          }).then(result => {
+            if (result.dismiss === Swal.DismissReason.timer)
+              setStartCount(true);
+          });
+        }
+      });
+
+      socket.on('user:disconnect', roomDetails => {
+        if (roomDetails.users.length < 2) {
+          let timerInterval;
+          Swal.fire({
+            title: `Other player has left the room!`,
+            html: 'Leaving the room in <strong></strong> seconds.',
+            timer: 5300,
+            timerProgressBar: true,
+            showDenyButton: true,
+            showConfirmButton: false,
+            denyButtonText: `Leave room`,
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+
+              const b = Swal.getHtmlContainer().querySelector('strong');
+              timerInterval = setInterval(() => {
+                b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0);
+              }, 100);
+            },
+          }).then(result => {
+            if (
+              result.isDenied ||
+              result.dismiss === Swal.DismissReason.timer
+            ) {
+              dispatch(clearCurrentRoom());
+              dispatch(clearCurrentPlayer());
+              dispatch(clearCurrentGame());
+              dispatch(clearOpponent());
+              socket.emit('room:leave');
+              Router.push('main-menu');
+            }
+          });
         }
       });
     });
@@ -126,6 +211,7 @@ const GamePage = () => {
 
     socket.on('game:end-done', (gameElement, winnerUserInfo) => {
       setTimer(-1);
+      setStartCount(false);
       const winUser = gameElement.users.filter(
         user => user.name === winnerUserInfo.name
       )[0];
@@ -134,12 +220,12 @@ const GamePage = () => {
       const newBoard = JSON.parse(JSON.stringify(map));
       if (winUser.isWarder) {
         newBoard[wCoor[0]][wCoor[1]] = 0;
-        newBoard[pCoor[0]][pCoor[1]] = 'w';
+        newBoard[pCoor[0]][pCoor[1]] = 'ww';
 
         setMatrix(newBoard);
       } else {
         newBoard[pCoor[0]][pCoor[1]] = 0;
-        newBoard[hCoor[0]][hCoor[1]] = 'p';
+        newBoard[hCoor[0]][hCoor[1]] = 'pw';
 
         setMatrix(newBoard);
       }
@@ -161,7 +247,7 @@ const GamePage = () => {
             : 'img/prisoner-win-pic.png',
           imageWidth: 200,
           imageHeight: 200,
-          imageAlt: 'Custom image',
+          imageAlt: 'winner image',
           showDenyButton: true,
           confirmButtonText: 'Play again?',
           denyButtonText: `Leave room`,
@@ -211,6 +297,66 @@ const GamePage = () => {
       dispatch(setUser({ ...user, isHost: true }));
     });
 
+    socket.on('game:reset-done', gameElement => {
+      console.log('log plz', gameElement);
+      setTimer(-1);
+      setStartCount(false);
+
+      let timerInterval;
+      Swal.fire({
+        allowOutsideClick: false,
+        title: 'Admin resetted the game!',
+        html: 'New game will start in <strong></strong> seconds. <br></br>',
+        timer: 5300,
+        timerProgressBar: true,
+        didOpen: () => {
+          Swal.showLoading();
+          const b = Swal.getHtmlContainer().querySelector('strong');
+          timerInterval = setInterval(() => {
+            b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0);
+          }, 100);
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        },
+      }).then(result => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+          console.log(gameElement);
+          setMatrix(gameElement.mapDetail.map);
+          const myUser = gameElement.users.filter(
+            currentUser => currentUser.name === user.name
+          )[0];
+          setIsWarder(myUser.isWarder);
+          setAlreadyWalk(false);
+          setGoingCoor(null);
+          setIsWarderTurn(true);
+          setTimer(10);
+
+          Swal.fire({
+            title: `You are ${myUser.isWarder ? 'Warder' : 'Prisoner'}`,
+            imageUrl: myUser.isWarder
+              ? 'img/warder-icon.png'
+              : 'img/prisoner-icon.png',
+            imageWidth: 100,
+            imageHeight: 100,
+            imageAlt: 'role image',
+            showClass: {
+              popup: 'animate__animated animate__fadeInLeft',
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOutRight',
+            },
+            showConfirmButton: false,
+            timer: 2000,
+            allowOutsideClick: false,
+          }).then(result => {
+            if (result.dismiss === Swal.DismissReason.timer)
+              setStartCount(true);
+          });
+        }
+      });
+    });
+
     socket.on('game:error', gameElement => {
       console.log(gameElement);
     });
@@ -221,18 +367,20 @@ const GamePage = () => {
 
     let timeout;
 
-    if (timer > 0) timeout = setTimeout(() => setTimer(prev => prev - 1), 1000);
+    if (startCount) {
+      if (timer > 0)
+        timeout = setTimeout(() => setTimer(prev => prev - 1), 1000);
 
-    if (timer === 0) {
-      if (isWarder === isWarderTurn) {
-        console.log('shit');
-        socket.emit('game:update', goingCoor, isWarderTurn);
-        return;
+      if (timer === 0) {
+        if (isWarder === isWarderTurn) {
+          socket.emit('game:update', goingCoor, isWarderTurn);
+          return;
+        }
       }
     }
 
     return () => clearTimeout(timeout);
-  }, [timer]);
+  }, [startCount, timer]);
 
   useEffect(() => {
     setTimer(10);
@@ -368,6 +516,12 @@ const GamePage = () => {
           coord.x === findPos(matrix, 'p').x
         )
           return 'success-highlighted';
+        else if (
+          isWarder &&
+          coord.y === findPos(matrix, 'h').y &&
+          coord.x === findPos(matrix, 'h').x
+        )
+          return 'danger-highlighted';
 
         return 'highlighted';
       } else {
@@ -419,6 +573,28 @@ const GamePage = () => {
         <>
           <img
             src="/img/hole-icon.png"
+            className="img-fluid"
+            alt="Obstacle pic"
+            style={{ height: '100%', objectFit: 'cover' }}
+          />
+        </>
+      );
+    } else if (character === 'ww') {
+      return (
+        <>
+          <img
+            src="/img/warder-win-pic.png"
+            className="img-fluid"
+            alt="Obstacle pic"
+            style={{ height: '100%', objectFit: 'cover' }}
+          />
+        </>
+      );
+    } else if (character === 'pw') {
+      return (
+        <>
+          <img
+            src="/img/prisoner-win-pic.png"
             className="img-fluid"
             alt="Obstacle pic"
             style={{ height: '100%', objectFit: 'cover' }}
@@ -490,6 +666,7 @@ const GamePage = () => {
     setMessage('');
   };
 
+  // Tutorial Modal
   const [showModal, setShowModal] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
@@ -503,8 +680,9 @@ const GamePage = () => {
       >
         <img src={tutorial.src} alt={tutorial.text} />
         <CarouselCaption
+          className="text-dark"
+          captionHeader={tutorial.header}
           captionText={tutorial.text}
-          captionHeader={tutorial.text}
         />
       </CarouselItem>
     );
@@ -512,17 +690,20 @@ const GamePage = () => {
 
   const next = () => {
     if (animating) return;
-    setActiveIndex(prev => prev + 1);
+
+    if (activeIndex < 2) setActiveIndex(prev => prev + 1);
   };
 
   const previous = () => {
     if (animating) return;
-    setActiveIndex(prev => prev - 1);
+
+    if (activeIndex > 0) setActiveIndex(prev => prev - 1);
   };
 
   const goToIndex = newIndex => {
     if (animating) return;
-    setActiveIndex(newIndex);
+
+    if (newIndex < 2) setActiveIndex(newIndex);
   };
 
   const renderModal = () => {
@@ -531,43 +712,37 @@ const GamePage = () => {
         <ModalHeader toggle={() => setShowModal(prev => !prev)}>
           Tutorial
         </ModalHeader>
-        <ModalBody>
-          <Carousel activeIndex={activeIndex} next={next} previous={previous}>
-            <CarouselIndicators
-              items={tutorials}
-              activeIndex={activeIndex}
-              onClickHandler={goToIndex}
-            />
-            {slides}
-            {activeIndex !== 0 && (
-              <CarouselControl
-                direction="prev"
-                directionText="Previous"
-                onClickHandler={previous}
+        <ModalBody className="p-0">
+          <div className="rounded-bottom overflow-hidden">
+            <Carousel activeIndex={activeIndex} next={next} previous={previous}>
+              <CarouselIndicators
+                items={tutorials}
+                activeIndex={activeIndex}
+                onClickHandler={goToIndex}
               />
-            )}
-            {activeIndex !== tutorials.length - 1 && (
-              <CarouselControl
-                direction="next"
-                directionText="Next"
-                onClickHandler={next}
-              />
-            )}
-          </Carousel>
+              {slides}
+              {activeIndex !== 0 && (
+                <CarouselControl
+                  direction="prev"
+                  directionText="Previous"
+                  onClickHandler={previous}
+                />
+              )}
+              {activeIndex !== tutorials.length - 1 && (
+                <CarouselControl
+                  direction="next"
+                  directionText="Next"
+                  onClickHandler={next}
+                />
+              )}
+            </Carousel>
+          </div>
         </ModalBody>
       </Modal>
     );
   };
 
   if (!matrix) return;
-
-  const renderPlaceholder = () => {
-    return (
-      <>
-        Press <strong>t</strong> to type...
-      </>
-    );
-  };
 
   return (
     <Container className="mt--6" fluid>
@@ -629,30 +804,36 @@ const GamePage = () => {
                 })}
               </Col>
             </Row>
-            <Row className="justify-content-center">
-              <Col className="text-center">
-                <input
-                  ref={inputRef}
-                  id="inputBox"
-                  className="mt-4"
-                  placeholder="Press t to type message..."
-                  onChange={e => setMessage(e.target.value)}
-                  value={message}
-                  onClick={() => {
-                    setInputFocus(true);
-                    inputRef.current?.focus();
-                  }}
-                  onBlur={() => setInputFocus(false)}
-                />
-                <button
-                  className="btn btn-outline-secondary"
-                  onClick={sendMsg}
-                  type="button"
-                  id="button-addon2"
-                  disabled={message === '' ? true : false}
-                >
-                  SEND
-                </button>
+            <Row
+              className="mt-4 mb-2 justify-content-center"
+              style={{ marginRight: '4rem', marginLeft: '0.5rem' }}
+            >
+              <Col className="d-flex text-center">
+                <InputGroup size="sm">
+                  <Input
+                    maxLength={14}
+                    innerRef={inputRef}
+                    id="inputBox"
+                    className="w-50"
+                    placeholder="Press t to type message..."
+                    onChange={e => setMessage(e.target.value)}
+                    value={message}
+                    onClick={() => {
+                      setInputFocus(true);
+                      inputRef.current?.focus();
+                    }}
+                    onBlur={() => setInputFocus(false)}
+                  />
+                  <Button
+                    size="sm"
+                    outline
+                    color="secondary"
+                    onClick={sendMsg}
+                    disabled={message === '' ? true : false}
+                  >
+                    SEND
+                  </Button>
+                </InputGroup>
               </Col>
             </Row>
             <a
