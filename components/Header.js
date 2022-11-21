@@ -18,7 +18,7 @@ const Header = ({
   const oppoRole = isWarder == false ? 'warder' : 'prisoner';
 
   return (
-    <header className="row justify-content-between">
+    <header className="row justify-content-between mx-0">
       <div className="col-4">
         <div className="d-flex align-items-center">
           <img

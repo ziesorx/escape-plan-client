@@ -4,6 +4,7 @@
 import Router from 'next/router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { faVolumeUp, faVolumeMute } from '@fortawesome/free-solid-svg-icons';
 import {
   Button,
   Card,
@@ -39,6 +40,7 @@ import {
 import 'animate.css';
 import { tutorials } from '../variables/tutorials';
 import useSound from 'use-sound';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const GamePage = () => {
   const { user } = useSelector(state => state.user);
@@ -63,7 +65,7 @@ const GamePage = () => {
   const dispatch = useDispatch();
 
   const [mute, setMute] = useState(false);
-  const option = { volume: 0.6, soundEnabled: !mute };
+  const option = { volume: mute ? 0 : 0.6, soundEnabled: !mute };
   const [playDefeat, { stop: stopDefeat }] = useSound(
     '/sounds/defeat.wav',
     option
@@ -72,6 +74,15 @@ const GamePage = () => {
     '/sounds/victory.wav',
     option
   );
+  const [playWalk, { stop: stopWalk }] = useSound(
+    '/sounds/walking.mp3',
+    option
+  );
+  const [playChatsound, { stop: stopChatsound }] = useSound(
+    '/sounds/chatsound.mp3',
+    option
+  );
+  const [playBg, { stop: stopBg }] = useSound('/sounds/background.mp3', option);
   const inputRef = useRef(null);
   const [inputFocus, setInputFocus] = useState(false);
 
@@ -207,6 +218,7 @@ const GamePage = () => {
       setMatrix(newCoor.mapDetail.map);
       setAlreadyWalk(false);
       setIsWarderTurn(newCoor.isWarderTurn);
+      playWalk();
     });
 
     socket.on('game:end-done', (gameElement, winnerUserInfo) => {
@@ -298,7 +310,6 @@ const GamePage = () => {
     });
 
     socket.on('game:reset-done', gameElement => {
-      console.log('log plz', gameElement);
       setTimer(-1);
       setStartCount(false);
 
@@ -394,6 +405,17 @@ const GamePage = () => {
   }, [isWin]);
 
   useEffect(() => {
+    if (mute) {
+      stopVictory();
+      stopDefeat();
+      stopWalk();
+      stopBg();
+    } else {
+      playBg();
+    }
+  }, [mute]);
+
+  useEffect(() => {
     let isCancelled = false;
     const messageChange = async () => {
       setTimeout(() => {
@@ -437,6 +459,7 @@ const GamePage = () => {
           setInputFocus(false);
         } else if (e.key === 'Enter') {
           sendMsg(message);
+          playChatsound();
           inputBox.blur();
         }
       },
@@ -668,6 +691,10 @@ const GamePage = () => {
     setMessage('');
   };
 
+  const volumeOnOff = () => {
+    setMute(prev => !prev);
+  };
+
   // Tutorial Modal
   const [showModal, setShowModal] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -795,9 +822,12 @@ const GamePage = () => {
             <Row className="justify-content-center mx-auto">
               <Col
                 md="5"
-                className="bg-white border border-1 border-dark"
+                className="border border-1 border-dark"
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.8) !important',
+                  backgroundColor:
+                    isWarder === isWarderTurn
+                      ? 'rgba(255, 255, 255, 1)'
+                      : 'rgba(0, 0, 0, 0.3)',
                 }}
               >
                 {matrix.map((row, rowIdx) => {
@@ -825,9 +855,17 @@ const GamePage = () => {
                 })}
               </Col>
             </Row>
+            <a className="mb-1 mx-2 position-absolute bottom-0 start-0">
+              <FontAwesomeIcon
+                icon={mute === false ? faVolumeUp : faVolumeMute}
+                size="2x"
+                onClick={volumeOnOff}
+                className="icon"
+              />
+            </a>
             <Row
               className="mt-4 mb-2 justify-content-center"
-              style={{ marginRight: '4rem', marginLeft: '0.5rem' }}
+              style={{ marginRight: '4rem', marginLeft: '4rem' }}
             >
               <Col className="d-flex text-center">
                 <InputGroup size="sm">
@@ -844,6 +882,7 @@ const GamePage = () => {
                       inputRef.current?.focus();
                     }}
                     onBlur={() => setInputFocus(false)}
+                    autoComplete="off"
                   />
                   <Button
                     size="sm"
