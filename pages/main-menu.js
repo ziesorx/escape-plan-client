@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { socket } from '../services/socket'
-import Router from 'next/router'
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { socket } from '../services/socket';
+import Router from 'next/router';
 import {
   Button,
   Card,
@@ -15,73 +15,73 @@ import {
   Spinner,
   ListGroup,
   ListGroupItem,
-} from 'reactstrap'
+} from 'reactstrap';
 
-import Swal from 'sweetalert2'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser } from '@fortawesome/free-solid-svg-icons'
-import { setUser, setOpponent } from '../store/features/userSlice'
-import { setCurrentPlayer, setCurrentRoom } from '../store/features/roomSlice'
-import useSound from 'use-sound'
+import Swal from 'sweetalert2';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { setUser, setOpponent } from '../store/features/userSlice';
+import { setCurrentPlayer, setCurrentRoom } from '../store/features/roomSlice';
+import useSound from 'use-sound';
 
 const LandingPage = () => {
-  const [roomId, setRoomId] = useState('')
-  const [disCreateButton, setDisCreateButton] = useState(false)
-  const [disJoinButton, setDisJoinButton] = useState(false)
-  const [joinRoom, setJoinRoom] = useState(false)
-  const [rooms, setRooms] = useState(null)
-  const [isBrowse, setIsBrowse] = useState(false)
-  const { user } = useSelector((state) => state.user)
+  const [roomId, setRoomId] = useState('');
+  const [disCreateButton, setDisCreateButton] = useState(false);
+  const [disJoinButton, setDisJoinButton] = useState(false);
+  const [joinRoom, setJoinRoom] = useState(false);
+  const [rooms, setRooms] = useState(null);
+  const [isBrowse, setIsBrowse] = useState(false);
+  const { user } = useSelector(state => state.user);
 
-  const dispatch = useDispatch()
-  const invalidRoom = false
+  const dispatch = useDispatch();
+  const invalidRoom = false;
 
-  const [mute, setMute] = useState(true)
-  const option = { volume: 0.6, soundEnabled: !mute }
-  const [playJoin] = useSound('/sounds/join.wav', option)
+  const [mute, setMute] = useState(true);
+  const option = { volume: 0.6, soundEnabled: !mute };
+  const [playJoin] = useSound('/sounds/join.wav', option);
 
   useEffect(() => {
-    socket.on('room:all-done', (rooms) => {
-      setRooms(rooms)
-    })
+    socket.on('room:all-done', rooms => {
+      setRooms(rooms);
+    });
 
-    socket.on('room:create-done', (roomDetails) => {
-      dispatch(setCurrentRoom(roomDetails))
-      dispatch(setCurrentPlayer(roomDetails.users.length))
-      dispatch(setUser(roomDetails.users[0]))
-      console.log(roomDetails.users.length)
-      console.log(roomDetails.users[0])
+    socket.on('room:create-done', roomDetails => {
+      dispatch(setCurrentRoom(roomDetails));
+      dispatch(setCurrentPlayer(roomDetails.users.length));
+      dispatch(setUser(roomDetails.users[0]));
+      console.log(roomDetails.users.length);
+      console.log(roomDetails.users[0]);
 
-      setMute(false)
-      Router.push('/waiting-room')
-    })
+      setMute(false);
+      Router.push('/waiting-room');
+    });
 
-    socket.on('room:join-done', (roomDetails) => {
-      dispatch(setCurrentRoom(roomDetails))
-      dispatch(setCurrentPlayer(roomDetails.users.length))
-      console.log(roomDetails.users.length)
-      console.log(roomDetails)
+    socket.on('room:join-done', roomDetails => {
+      dispatch(setCurrentRoom(roomDetails));
+      dispatch(setCurrentPlayer(roomDetails.users.length));
+      console.log(roomDetails.users.length);
+      console.log(roomDetails);
       if (user.name === roomDetails.users[0].name) {
-        dispatch(setUser(roomDetails.users[0]))
-        dispatch(setOpponent(roomDetails.users[1]))
+        dispatch(setUser(roomDetails.users[0]));
+        dispatch(setOpponent(roomDetails.users[1]));
       } else {
-        dispatch(setUser(roomDetails.users[1]))
-        dispatch(setOpponent(roomDetails.users[0]))
+        dispatch(setUser(roomDetails.users[1]));
+        dispatch(setOpponent(roomDetails.users[0]));
       }
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
     if (!mute) {
-      playJoin()
+      playJoin();
     }
-  }, [mute])
+  }, [mute]);
 
   const onCreateClick = () => {
-    setDisCreateButton(true)
+    setDisCreateButton(true);
 
-    socket.emit('room:create')
-  }
+    socket.emit('room:create');
+  };
 
   const renderJoin = () => {
     return (
@@ -90,7 +90,7 @@ const LandingPage = () => {
           className="mt-4"
           bsSize="lg"
           placeholder="Enter room id..."
-          onChange={(e) => setRoomId(e.target.value)}
+          onChange={e => setRoomId(e.target.value)}
           value={roomId}
         />
 
@@ -104,8 +104,8 @@ const LandingPage = () => {
           {disJoinButton ? renderSpinner() : 'Join Room'}
         </Button>
       </>
-    )
-  }
+    );
+  };
 
   const renderButton = () => {
     return (
@@ -119,65 +119,65 @@ const LandingPage = () => {
           Join Room
         </Button>
       </>
-    )
-  }
+    );
+  };
 
-  const backToMenu = (e) => {
-    setIsBrowse(false)
-  }
+  const backToMenu = e => {
+    setIsBrowse(false);
+  };
 
-  const onJoinClick = (roomID) => {
-    setDisJoinButton(true)
+  const onJoinClick = (e, roomID) => {
+    setDisJoinButton(true);
 
     Swal.fire({
       title: 'Joining Room',
       timer: 1000,
       timerProgressBar: true,
       didOpen: () => {
-        Swal.showLoading()
+        Swal.showLoading();
 
-        socket.emit('room:join', roomID ?? roomId)
+        socket.emit('room:join', roomID ?? roomId);
 
-        socket.on('room:error', (message) => {
+        socket.on('room:error', message => {
           if (message != null) {
-            invalidRoom = true
+            invalidRoom = true;
           }
-        })
+        });
       },
-    }).then((result) => {
+    }).then(result => {
       if (invalidRoom === true) {
         Swal.fire({
           title: `There is no such room`,
           icon: 'error',
           showConfirmButton: false,
           timer: 1500,
-        }).then((result) => {
-          setDisJoinButton(false)
-        })
+        }).then(result => {
+          setDisJoinButton(false);
+        });
       } else {
-        setDisJoinButton(false)
-        setMute(false)
-        Router.push('/waiting-room')
+        setDisJoinButton(false);
+        setMute(false);
+        Router.push('/waiting-room');
       }
-    })
-  }
+    });
+  };
 
   const onBrowseClick = () => {
-    socket.emit('room:all')
+    socket.emit('room:all');
 
-    setIsBrowse(true)
-  }
+    setIsBrowse(true);
+  };
 
   const renderSpinner = () => {
-    return <Spinner animation="border" role="status" size="sm"></Spinner>
-  }
+    return <Spinner animation="border" role="status" size="sm"></Spinner>;
+  };
 
-  const renderRooms = (allRooms) => {
+  const renderRooms = allRooms => {
     if (allRooms.length === 0) {
-      return <ListGroupItem>There is no room in the server</ListGroupItem>
+      return <ListGroupItem>There is no room in the server</ListGroupItem>;
     }
 
-    return allRooms.slice(0, 10).map((room) => (
+    return allRooms.slice(0, 10).map(room => (
       <ListGroupItem key={room.id}>
         <div className="d-flex">
           <Col md="9" className="d-flex align-items-center">
@@ -202,7 +202,7 @@ const LandingPage = () => {
             <Button
               size="sm"
               className="btn-create"
-              onClick={() => onJoinClick(room.id)}
+              onClick={e => onJoinClick(e, room.id)}
               disabled={room.users.length === 2 || disJoinButton}
             >
               Join
@@ -210,8 +210,8 @@ const LandingPage = () => {
           </Col>
         </div>
       </ListGroupItem>
-    ))
-  }
+    ));
+  };
 
   if (isBrowse && rooms) {
     return (
@@ -235,7 +235,7 @@ const LandingPage = () => {
           </Card>
         </Container>
       </>
-    )
+    );
   }
 
   return (
@@ -294,7 +294,7 @@ const LandingPage = () => {
         </Card>
       </Container>
     </>
-  )
-}
+  );
+};
 
-export default LandingPage
+export default LandingPage;
