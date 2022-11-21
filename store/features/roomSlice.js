@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   currentRoom: null,
   currentPlayer: null,
+  currentGame: null,
 };
 
 const roomSlice = createSlice({
@@ -21,6 +22,12 @@ const roomSlice = createSlice({
     clearCurrentPlayer: state => {
       state.currentPlayer = null;
     },
+    setCurrentGame: (state, action) => {
+      state.currentGame = action.payload;
+    },
+    clearCurrentGame: state => {
+      state.currentGame = null;
+    },
   },
 });
 
@@ -30,6 +37,8 @@ export const {
   clearCurrentRoom,
   setCurrentPlayer,
   clearCurrentPlayer,
+  setCurrentGame,
+  clearCurrentGame,
 } = roomSlice.actions;
 
 export default roomSlice.reducer;

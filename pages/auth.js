@@ -18,6 +18,7 @@ import { useDispatch } from 'react-redux';
 import { avatars } from '../variables/avatars';
 import { setOpponent, setUser } from '../store/features/userSlice';
 import Router from 'next/router';
+import Swal from 'sweetalert2';
 
 const Auth = () => {
   const [name, setName] = useState('');
@@ -31,6 +32,21 @@ const Auth = () => {
       dispatch(setUser(userInfo));
 
       Router.push('/main-menu');
+    });
+
+    socket.on('user:error', message => {
+      if (message === 'already login') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'This user already in server',
+          confirmButtonText: 'Try again',
+          allowOutsideClick: false,
+        }).then(result => {
+          setDisButton(false);
+          setName('');
+        });
+      }
     });
   }, []);
 
@@ -62,6 +78,26 @@ const Auth = () => {
   const onLoginClick = () => {
     setDisButton(true);
 
+    if (!name) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please fill your name!',
+      });
+      setDisButton(false);
+      return;
+    }
+
+    if (!selectedAvatarId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please select an avatar!',
+      });
+      setDisButton(false);
+      return;
+    }
+
     socket.emit('user:login', name, selectedAvatarId);
   };
 
@@ -69,8 +105,8 @@ const Auth = () => {
     <>
       <Container className="mt--6 pb-5" fluid>
         <Row className="justify-content-center mx-auto">
-          <Col md="5">
-            <Card className="main-card">
+          <Col md="8">
+            <Card className="auth-card">
               <CardBody className="px-lg-5 py-lg-5">
                 <div className="text-center mb-5">
                   <strong className="fs-1">
