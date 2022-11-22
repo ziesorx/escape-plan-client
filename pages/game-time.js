@@ -78,11 +78,11 @@ const GamePage = () => {
     '/sounds/walking.mp3',
     option
   );
-  const [playChatsound, { stop: stopChatsound }] = useSound(
-    '/sounds/chatsound.mp3',
-    option
-  );
-  const [playBg, { stop: stopBg }] = useSound('/sounds/background.mp3', option);
+  // const [playChatsound, { stop: stopChatsound }] = useSound(
+  //   '/sounds/chatsound.mp3',
+  //   option
+  // );
+  // const [playBg, { stop: stopBg }] = useSound('/sounds/background.mp3', option);
   const inputRef = useRef(null);
   const [inputFocus, setInputFocus] = useState(false);
 
@@ -404,16 +404,14 @@ const GamePage = () => {
     else playDefeat();
   }, [isWin]);
 
-  useEffect(() => {
-    if (mute) {
-      stopVictory();
-      stopDefeat();
-      stopWalk();
-      stopBg();
-    } else {
-      playBg();
-    }
-  }, [mute]);
+  // useEffect(() => {
+  //   if (mute) {
+  //     stopVictory();
+  //     stopDefeat();
+  //     stopWalk();
+  //     stopBg();
+  //   }
+  // }, [mute]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -459,7 +457,7 @@ const GamePage = () => {
           setInputFocus(false);
         } else if (e.key === 'Enter') {
           sendMsg(message);
-          playChatsound();
+          // playChatsound();
           inputBox.blur();
         }
       },
