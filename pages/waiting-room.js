@@ -1,13 +1,13 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
-import Router from 'next/router';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { avatars } from '../variables/avatars';
-import Swal from 'sweetalert2';
+import Router from 'next/router'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faUser } from '@fortawesome/free-solid-svg-icons'
+import { avatars } from '../variables/avatars'
+import Swal from 'sweetalert2'
 
 import {
   Button,
@@ -24,59 +24,59 @@ import {
   CarouselControl,
   CarouselIndicators,
   CarouselCaption,
-} from 'reactstrap';
+} from 'reactstrap'
 
 import userSlice, {
   clearOpponent,
   clearUser,
   setUser,
-} from '../store/features/userSlice';
+} from '../store/features/userSlice'
 import {
   clearCurrentPlayer,
   clearCurrentRoom,
   setCurrentGame,
   setCurrentPlayer,
-} from '../store/features/roomSlice';
-import { socket } from '../services/socket';
-import useSound from 'use-sound';
-import { tutorials } from '../variables/tutorials';
+} from '../store/features/roomSlice'
+import { socket } from '../services/socket'
+import useSound from 'use-sound'
+import { tutorials } from '../variables/tutorials'
 
 const Waiting = () => {
-  const { user } = useSelector(state => state.user);
-  const { opponent } = useSelector(state => state.user);
-  const { currentRoom } = useSelector(state => state.room);
-  const { currentPlayer } = useSelector(state => state.room);
-  const [isPlayerLeft, setIsPlayerLeft] = useState(false);
+  const { user } = useSelector((state) => state.user)
+  const { opponent } = useSelector((state) => state.user)
+  const { currentRoom } = useSelector((state) => state.room)
+  const { currentPlayer } = useSelector((state) => state.room)
+  const [isPlayerLeft, setIsPlayerLeft] = useState(false)
 
-  const [mute, setMute] = useState(true);
-  const option = { volume: 0.6, soundEnabled: !mute };
-  const [playJoin] = useSound('/sounds/join.wav', option);
+  const [mute, setMute] = useState(true)
+  const option = { volume: 0.6, soundEnabled: !mute }
+  const [playJoin] = useSound('/sounds/join.wav', option)
 
-  const userAvatar = avatars.filter(avatar => avatar.id === user.avatarId);
+  const userAvatar = avatars.filter((avatar) => avatar.id === user.avatarId)
   const opponentAvatar = avatars.filter(
-    avatar => avatar.id === opponent.avatarId
-  );
-  const userName = user.name;
-  const opponentName = opponent.name;
+    (avatar) => avatar.id === opponent.avatarId
+  )
+  const userName = user.name
+  const opponentName = opponent.name
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    socket.on('room:start-done', gameElement => {
-      console.log(gameElement);
-      dispatch(setCurrentGame(gameElement));
-    });
+    socket.on('room:start-done', (gameElement) => {
+      console.log(gameElement)
+      dispatch(setCurrentGame(gameElement))
+    })
 
-    socket.on('room:leave-done', roomDetails => {
-      dispatch(setCurrentPlayer(roomDetails.users.length));
-      dispatch(clearOpponent());
-      console.log(roomDetails);
-      setIsPlayerLeft(prev => !prev);
-    });
+    socket.on('room:leave-done', (roomDetails) => {
+      dispatch(setCurrentPlayer(roomDetails.users.length))
+      dispatch(clearOpponent())
+      console.log(roomDetails)
+      setIsPlayerLeft((prev) => !prev)
+    })
 
-    socket.on('user:disconnect', roomDetails => {
+    socket.on('user:disconnect', (roomDetails) => {
       if (roomDetails.users.length < 2) {
-        let timerInterval;
+        let timerInterval
         Swal.fire({
           title: `Other player has left the room!`,
           html: 'Leaving the room in <strong></strong> seconds.',
@@ -87,37 +87,37 @@ const Waiting = () => {
           denyButtonText: `Leave room`,
           allowOutsideClick: false,
           didOpen: () => {
-            Swal.showLoading();
+            Swal.showLoading()
 
-            const b = Swal.getHtmlContainer().querySelector('strong');
+            const b = Swal.getHtmlContainer().querySelector('strong')
             timerInterval = setInterval(() => {
-              b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0);
-            }, 100);
+              b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0)
+            }, 100)
           },
-        }).then(result => {
+        }).then((result) => {
           if (result.isDenied || result.dismiss === Swal.DismissReason.timer) {
-            dispatch(clearCurrentRoom());
-            dispatch(clearCurrentPlayer());
-            dispatch(clearOpponent());
-            socket.emit('room:leave');
-            Router.push('main-menu');
+            dispatch(clearCurrentRoom())
+            dispatch(clearCurrentPlayer())
+            dispatch(clearOpponent())
+            socket.emit('room:leave')
+            Router.push('main-menu')
           }
-        });
+        })
       }
-    });
-  }, []);
+    })
+  }, [])
 
   useEffect(() => {
     if (!mute) {
-      playJoin();
-      setMute(true);
+      playJoin()
+      setMute(true)
     }
-  }, [mute]);
+  }, [mute])
 
   useEffect(() => {
     if (opponent.name) {
       socket.on('room:starting-done', () => {
-        let timerInterval;
+        let timerInterval
         Swal.fire({
           allowOutsideClick: false,
           title: 'GAME STARTED!',
@@ -125,61 +125,61 @@ const Waiting = () => {
           timer: 5300,
           timerProgressBar: true,
           didOpen: () => {
-            Swal.showLoading();
+            Swal.showLoading()
 
             if (user.isHost) {
-              socket.emit('room:start', userName, opponentName);
+              socket.emit('room:start', userName, opponentName)
 
-              socket.on('room:error', message => {
-                console.log(message);
-              });
+              socket.on('room:error', (message) => {
+                console.log(message)
+              })
             }
 
-            const b = Swal.getHtmlContainer().querySelector('strong');
+            const b = Swal.getHtmlContainer().querySelector('strong')
             timerInterval = setInterval(() => {
-              b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0);
-            }, 100);
+              b.textContent = (Swal.getTimerLeft() / 1000).toFixed(0)
+            }, 100)
           },
           willClose: () => {
-            clearInterval(timerInterval);
+            clearInterval(timerInterval)
           },
-        }).then(result => {
+        }).then((result) => {
           if (result.dismiss === Swal.DismissReason.timer) {
-            Router.push('/game-time');
+            Router.push('/game-time')
           }
-        });
-      });
+        })
+      })
     }
-  }, [opponent.name]);
+  }, [opponent.name])
 
   useEffect(() => {
     if (!user.isHost && isPlayerLeft) {
-      dispatch(setUser({ ...user, isHost: true }));
+      dispatch(setUser({ ...user, isHost: true }))
       Swal.fire({
         title: 'YOU ARE HOST!',
         timer: 2000,
         timerProgressBar: true,
         icon: 'warning',
         showConfirmButton: false,
-      }).then(result => setIsPlayerLeft(prev => !prev));
+      }).then((result) => setIsPlayerLeft((prev) => !prev))
     }
-  }, [user.isHost, isPlayerLeft]);
+  }, [user.isHost, isPlayerLeft])
 
   useEffect(() => {
     if (currentPlayer === 2) {
-      setMute(false);
+      setMute(false)
     }
-  }, [currentPlayer]);
+  }, [currentPlayer])
 
-  const backToIndex = e => {
-    e.preventDefault();
+  const backToIndex = (e) => {
+    e.preventDefault()
 
-    dispatch(clearCurrentRoom());
-    dispatch(clearCurrentPlayer());
-    dispatch(clearOpponent());
-    socket.emit('room:leave');
-    Router.push('/main-menu');
-  };
+    dispatch(clearCurrentRoom())
+    dispatch(clearCurrentPlayer())
+    dispatch(clearOpponent())
+    socket.emit('room:leave')
+    Router.push('/main-menu')
+  }
 
   const toGameroom = () => {
     if (Object.keys(user).length === 0 || Object.keys(opponent).length === 0)
@@ -190,15 +190,15 @@ const Waiting = () => {
         text: 'Not enough player',
         icon: 'error',
         showConfirmButton: false,
-      });
+      })
     else {
-      console.log('starting');
-      socket.emit('room:starting');
+      console.log('starting')
+      socket.emit('room:starting')
     }
-  };
+  }
 
-  const [modal, setModal] = useState(false);
-  const toggle = () => setModal(!modal);
+  const [modal, setModal] = useState(false)
+  const toggle = () => setModal(!modal)
   //console.log(currentRoom);
 
   // if (!currentRoom) return;
@@ -214,53 +214,63 @@ const Waiting = () => {
       >
         <span className="fs-3">Start</span>
       </Button>
-    );
-  };
+    )
+  }
 
   // Tutorial Modal
-  const [showModal, setShowModal] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [animating, setAnimating] = useState(false);
+  const [showModal, setShowModal] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [animating, setAnimating] = useState(false)
 
-  const slides = tutorials.map(tutorial => {
+  const slides = tutorials.map((tutorial) => {
     return (
       <CarouselItem
+        style={{ width: '412.5px', height: '540px' }}
         onExiting={() => setAnimating(true)}
         onExited={() => setAnimating(false)}
         key={tutorial.id}
       >
-        <img src={tutorial.src} alt={tutorial.text} />
+        <img
+          style={{
+            objectFit: 'contain',
+            width: '412.5px',
+            height: '540px',
+            opacity: 0.6,
+          }}
+          src={tutorial.src}
+          alt={tutorial.text}
+        />
         <CarouselCaption
           className="text-dark"
           captionHeader={tutorial.header}
           captionText={tutorial.text}
         />
       </CarouselItem>
-    );
-  });
+    )
+  })
 
   const next = () => {
-    if (animating) return;
+    if (animating) return
 
-    if (activeIndex < 2) setActiveIndex(prev => prev + 1);
-  };
+    if (activeIndex < 2) setActiveIndex((prev) => prev + 1)
+  }
 
   const previous = () => {
-    if (animating) return;
+    if (animating) return
 
-    if (activeIndex > 0) setActiveIndex(prev => prev - 1);
-  };
+    if (activeIndex > 0) setActiveIndex((prev) => prev - 1)
+  }
 
-  const goToIndex = newIndex => {
-    if (animating) return;
+  const goToIndex = (newIndex) => {
+    if (animating) return
 
-    if (newIndex < 2) setActiveIndex(newIndex);
-  };
+    if (newIndex < 2) setActiveIndex(newIndex)
+  }
 
   const renderModal = () => {
     return (
-      <Modal isOpen={showModal} toggle={() => setShowModal(prev => !prev)}>
-        <ModalHeader toggle={() => setShowModal(prev => !prev)}>
+      <Modal isOpen={showModal} toggle={() => setShowModal((prev) => !prev)}>
+        <ModalHeader toggle={() => setShowModal((prev) => !prev)}>
           Tutorial
         </ModalHeader>
         <ModalBody className="p-0">
@@ -290,8 +300,8 @@ const Waiting = () => {
           </div>
         </ModalBody>
       </Modal>
-    );
-  };
+    )
+  }
 
   return (
     <Container className="h-100 d-flex justify-content-center" fluid>
@@ -380,7 +390,7 @@ const Waiting = () => {
             <Col md="4">
               <a
                 className="instruction mb-1 mx-1 position-absolute bottom-0 end-0"
-                onClick={() => setShowModal(prev => !prev)}
+                onClick={() => setShowModal((prev) => !prev)}
               >
                 <img
                   src="/img/instruction-icon.jpg"
@@ -393,7 +403,7 @@ const Waiting = () => {
         </Row>
       </Card>
     </Container>
-  );
-};
+  )
+}
 
-export default Waiting;
+export default Waiting
