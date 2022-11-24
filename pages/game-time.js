@@ -83,7 +83,7 @@ const GamePage = () => {
   );
   const [playChatsound, { stop: stopChatsound }] = useSound(
     '/sounds/chatsound.wav',
-    { volume: mute ? 0 : 0.4, soundEnabled: !mute }
+    { volume: mute ? 0 : 0.2, soundEnabled: !mute }
   );
   const inputRef = useRef(null);
   const [inputFocus, setInputFocus] = useState(false);
