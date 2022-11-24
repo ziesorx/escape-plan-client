@@ -65,7 +65,10 @@ const GamePage = () => {
   const dispatch = useDispatch();
 
   const [mute, setMute] = useState(false);
-  const option = { volume: mute ? 0 : 0.6, soundEnabled: !mute };
+  const option = {
+    volume: mute ? 0 : 0.6,
+    soundEnabled: !mute,
+  };
   const [playDefeat, { stop: stopDefeat }] = useSound(
     '/sounds/defeat.wav',
     option
@@ -78,11 +81,10 @@ const GamePage = () => {
     '/sounds/walking.mp3',
     option
   );
-  // const [playChatsound, { stop: stopChatsound }] = useSound(
-  //   '/sounds/chatsound.mp3',
-  //   option
-  // );
-  // const [playBg, { stop: stopBg }] = useSound('/sounds/background.mp3', option);
+  const [playChatsound, { stop: stopChatsound }] = useSound(
+    '/sounds/chatsound.wav',
+    { volume: mute ? 0 : 0.4, soundEnabled: !mute }
+  );
   const inputRef = useRef(null);
   const [inputFocus, setInputFocus] = useState(false);
 
@@ -114,7 +116,9 @@ const GamePage = () => {
       timer: 2000,
       allowOutsideClick: false,
     }).then(result => {
-      if (result.dismiss === Swal.DismissReason.timer) setStartCount(true);
+      if (result.dismiss === Swal.DismissReason.timer) {
+        setStartCount(true);
+      }
     });
   };
 
@@ -147,6 +151,7 @@ const GamePage = () => {
           const myUser = gameElement.users.filter(
             currentUser => currentUser.name === user.name
           )[0];
+          setIsWin(null);
           setIsWarder(myUser.isWarder);
           setAlreadyWalk(false);
           setGoingCoor(null);
@@ -215,10 +220,10 @@ const GamePage = () => {
     });
 
     socket.on('game:update-done', newCoor => {
+      console.log('update done');
       setMatrix(newCoor.mapDetail.map);
       setAlreadyWalk(false);
       setIsWarderTurn(newCoor.isWarderTurn);
-      playWalk();
     });
 
     socket.on('game:end-done', (gameElement, winnerUserInfo) => {
@@ -404,14 +409,10 @@ const GamePage = () => {
     else playDefeat();
   }, [isWin]);
 
-  // useEffect(() => {
-  //   if (mute) {
-  //     stopVictory();
-  //     stopDefeat();
-  //     stopWalk();
-  //     stopBg();
-  //   }
-  // }, [mute]);
+  useEffect(() => {
+    if (mute) {
+    }
+  }, [mute]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -425,6 +426,7 @@ const GamePage = () => {
             setTimeout(() => {
               setChatMessageLeft(message);
               setDisplayLeft(true);
+              playChatsound();
             }, 500);
             setTimeout(() => {
               setDisplayLeft(false);
@@ -435,6 +437,7 @@ const GamePage = () => {
             setTimeout(() => {
               setChatMessageRight(message);
               setDisplayRight(true);
+              playChatsound();
             }, 500);
             setTimeout(() => {
               setDisplayRight(false);
@@ -456,8 +459,7 @@ const GamePage = () => {
         } else if (e.key === 'Escape') {
           setInputFocus(false);
         } else if (e.key === 'Enter') {
-          sendMsg(message);
-          // playChatsound();
+          if (message != '') sendMsg(message);
           inputBox.blur();
         }
       },
@@ -680,6 +682,7 @@ const GamePage = () => {
     newBoard[rowIdx][columnIdx] = isWarder ? 'w' : 'p';
 
     socket.emit('game:update', [rowIdx, columnIdx], isWarderTurn);
+    playWalk();
 
     setMatrix(newBoard);
   };
@@ -687,10 +690,6 @@ const GamePage = () => {
   const sendMsg = sendMessage => {
     socket.emit('game:chat', sendMessage);
     setMessage('');
-  };
-
-  const volumeOnOff = () => {
-    setMute(prev => !prev);
   };
 
   // Tutorial Modal
@@ -786,6 +785,10 @@ const GamePage = () => {
         </ModalBody>
       </Modal>
     );
+  };
+
+  const volumeOnOff = () => {
+    setMute(prev => !prev);
   };
 
   if (!matrix) return;

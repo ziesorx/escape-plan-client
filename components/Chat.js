@@ -1,6 +1,5 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { Col, Row } from 'reactstrap';
+import { Col } from 'reactstrap';
 
 const Chat = ({
   chatMessageLeft,

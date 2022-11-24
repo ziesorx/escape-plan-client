@@ -225,11 +225,21 @@ const Waiting = () => {
   const slides = tutorials.map(tutorial => {
     return (
       <CarouselItem
+        style={{ width: '412.5px', height: '540px' }}
         onExiting={() => setAnimating(true)}
         onExited={() => setAnimating(false)}
         key={tutorial.id}
       >
-        <img src={tutorial.src} alt={tutorial.text} />
+        <img
+          style={{
+            objectFit: 'contain',
+            width: '412.5px',
+            height: '540px',
+            opacity: 0.6,
+          }}
+          src={tutorial.src}
+          alt={tutorial.text}
+        />
         <CarouselCaption
           className="text-dark"
           captionHeader={tutorial.header}
@@ -259,13 +269,22 @@ const Waiting = () => {
 
   const renderModal = () => {
     return (
-      <Modal isOpen={showModal} toggle={() => setShowModal(prev => !prev)}>
+      <Modal
+        isOpen={showModal}
+        toggle={() => setShowModal(prev => !prev)}
+        style={{ width: '412.5px', height: '540px' }}
+      >
         <ModalHeader toggle={() => setShowModal(prev => !prev)}>
           Tutorial
         </ModalHeader>
         <ModalBody className="p-0">
           <div className="rounded-bottom overflow-hidden">
-            <Carousel activeIndex={activeIndex} next={next} previous={previous}>
+            <Carousel
+              dark
+              activeIndex={activeIndex}
+              next={next}
+              previous={previous}
+            >
               <CarouselIndicators
                 items={tutorials}
                 activeIndex={activeIndex}
