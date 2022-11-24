@@ -15,4 +15,6 @@ We are not be focusing too much on styling as this project is all about how sock
 
 [**Click here for a live Demo of the final game**](https://escape-plan.vercel.app/)
 
+For Backend code, check out [here](https://github.com/Jackietanakit/escape-plan-client)
+
 Thanks for stopping by! If you like this project, feel free to try the game 🤗.
