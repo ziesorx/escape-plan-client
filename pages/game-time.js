@@ -83,7 +83,7 @@ const GamePage = () => {
   );
   const [playChatsound, { stop: stopChatsound }] = useSound(
     '/sounds/chatsound.wav',
-    { volume: mute ? 0 : 0.2, soundEnabled: !mute }
+    { volume: mute ? 0 : 0.1, soundEnabled: !mute }
   );
   const inputRef = useRef(null);
   const [inputFocus, setInputFocus] = useState(false);
@@ -534,6 +534,12 @@ const GamePage = () => {
         )
           return 'danger-highlighted';
         else if (
+          !isWarder &&
+          coord.y === findPos(matrix, 'h').y &&
+          coord.x === findPos(matrix, 'h').x
+        )
+          return 'success-highlighted';
+        else if (
           isWarder &&
           coord.y === findPos(matrix, 'p').y &&
           coord.x === findPos(matrix, 'p').x
@@ -794,122 +800,120 @@ const GamePage = () => {
   if (!matrix) return;
 
   return (
-    <Container className="mt--6" fluid>
-      <Row className="justify-content-center mx-auto">
-        <Col className="position-relative" md="10">
-          <Chat
-            chatMessageLeft={chatMessageLeft}
-            chatMessageRight={chatMessageRight}
-            displayLeft={displayLeft}
-            displayRight={displayRight}
-          ></Chat>
-          <Card
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.8)',
-              border: '3px solid white',
-            }}
-          >
-            <Header
-              myImg={user.avatarId}
-              oppoImg={opponent.avatarId}
-              myName={user.name}
-              oppoName={opponent.name}
-              isWarder={isWarder}
-              myScore={user.score}
-              oppoScore={opponent.score}
-              timer={timer}
-              isWarderTurn={isWarderTurn}
+    <Container className="mt--6">
+      <div className="position-relative">
+        <Chat
+          chatMessageLeft={chatMessageLeft}
+          chatMessageRight={chatMessageRight}
+          displayLeft={displayLeft}
+          displayRight={displayRight}
+        ></Chat>
+        <Card
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            border: '3px solid white',
+          }}
+        >
+          <Header
+            myImg={user.avatarId}
+            oppoImg={opponent.avatarId}
+            myName={user.name}
+            oppoName={opponent.name}
+            isWarder={isWarder}
+            myScore={user.score}
+            oppoScore={opponent.score}
+            timer={timer}
+            isWarderTurn={isWarderTurn}
+          />
+          <Row className="justify-content-center mx-auto">
+            <Col
+              md="5"
+              className="border border-1 border-dark"
+              style={{
+                backgroundColor:
+                  isWarder === isWarderTurn
+                    ? 'rgba(255, 255, 255, 1)'
+                    : 'rgba(0, 0, 0, 0.3)',
+              }}
+            >
+              {matrix.map((row, rowIdx) => {
+                return (
+                  <Row key={rowIdx}>
+                    {row.map((column, columnIdx) => {
+                      return (
+                        <Col
+                          key={columnIdx}
+                          className={`border border-1 border-dark game-tile px-0 ${highlightTile(
+                            { x: columnIdx, y: rowIdx }
+                          )}`}
+                          onClick={() => {
+                            if (isWarder === isWarderTurn && !alreadyWalk) {
+                              updateCurrentBoard(rowIdx, columnIdx);
+                            }
+                          }}
+                        >
+                          {renderCharacter(column)}
+                        </Col>
+                      );
+                    })}
+                  </Row>
+                );
+              })}
+            </Col>
+          </Row>
+          <a className="mb-1 mx-2 position-absolute bottom-0 start-0">
+            <FontAwesomeIcon
+              icon={mute === false ? faVolumeUp : faVolumeMute}
+              size="2x"
+              onClick={volumeOnOff}
+              className="icon"
             />
-            <Row className="justify-content-center mx-auto">
-              <Col
-                md="5"
-                className="border border-1 border-dark"
-                style={{
-                  backgroundColor:
-                    isWarder === isWarderTurn
-                      ? 'rgba(255, 255, 255, 1)'
-                      : 'rgba(0, 0, 0, 0.3)',
-                }}
-              >
-                {matrix.map((row, rowIdx) => {
-                  return (
-                    <Row key={rowIdx}>
-                      {row.map((column, columnIdx) => {
-                        return (
-                          <Col
-                            key={columnIdx}
-                            className={`border border-1 border-dark game-tile px-0 ${highlightTile(
-                              { x: columnIdx, y: rowIdx }
-                            )}`}
-                            onClick={() => {
-                              if (isWarder === isWarderTurn && !alreadyWalk) {
-                                updateCurrentBoard(rowIdx, columnIdx);
-                              }
-                            }}
-                          >
-                            {renderCharacter(column)}
-                          </Col>
-                        );
-                      })}
-                    </Row>
-                  );
-                })}
-              </Col>
-            </Row>
-            <a className="mb-1 mx-2 position-absolute bottom-0 start-0">
-              <FontAwesomeIcon
-                icon={mute === false ? faVolumeUp : faVolumeMute}
-                size="2x"
-                onClick={volumeOnOff}
-                className="icon"
-              />
-            </a>
-            <Row
-              className="mt-4 mb-2 justify-content-center"
-              style={{ marginRight: '4rem', marginLeft: '4rem' }}
-            >
-              <Col className="d-flex text-center">
-                <InputGroup size="sm">
-                  <Input
-                    maxLength={14}
-                    innerRef={inputRef}
-                    id="inputBox"
-                    className="w-50"
-                    placeholder="Press t to type message..."
-                    onChange={e => setMessage(e.target.value)}
-                    value={message}
-                    onClick={() => {
-                      setInputFocus(true);
-                      inputRef.current?.focus();
-                    }}
-                    onBlur={() => setInputFocus(false)}
-                    autoComplete="off"
-                  />
-                  <Button
-                    size="sm"
-                    outline
-                    color="secondary"
-                    onClick={sendMsg}
-                    disabled={message === '' ? true : false}
-                  >
-                    SEND
-                  </Button>
-                </InputGroup>
-              </Col>
-            </Row>
-            <a
-              className="instruction mb-1 mx-1 position-absolute bottom-0 end-0"
-              onClick={() => setShowModal(prev => !prev)}
-            >
-              <img
-                src="/img/instruction-icon.jpg"
-                className="img-fluid rounded w-100"
-              />
-            </a>
-            {renderModal()}
-          </Card>
-        </Col>
-      </Row>
+          </a>
+          <Row
+            className="mt-4 mb-2 justify-content-center"
+            style={{ marginRight: '4rem', marginLeft: '4rem' }}
+          >
+            <Col className="d-flex text-center">
+              <InputGroup size="sm">
+                <Input
+                  maxLength={14}
+                  innerRef={inputRef}
+                  id="inputBox"
+                  className="w-50"
+                  placeholder="Press t to type message..."
+                  onChange={e => setMessage(e.target.value)}
+                  value={message}
+                  onClick={() => {
+                    setInputFocus(true);
+                    inputRef.current?.focus();
+                  }}
+                  onBlur={() => setInputFocus(false)}
+                  autoComplete="off"
+                />
+                <Button
+                  size="sm"
+                  outline
+                  color="secondary"
+                  onClick={sendMsg}
+                  disabled={message === '' ? true : false}
+                >
+                  SEND
+                </Button>
+              </InputGroup>
+            </Col>
+          </Row>
+          <a
+            className="instruction mb-1 mx-1 position-absolute bottom-0 end-0"
+            onClick={() => setShowModal(prev => !prev)}
+          >
+            <img
+              src="/img/instruction-icon.jpg"
+              className="img-fluid rounded w-100"
+            />
+          </a>
+          {renderModal()}
+        </Card>
+      </div>
     </Container>
   );
 };
